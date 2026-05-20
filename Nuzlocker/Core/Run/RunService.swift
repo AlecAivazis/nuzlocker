@@ -5,24 +5,9 @@ import Observation
 @Observable
 final class RunService {
     let modelContainer: ModelContainer
-    private(set) var currentRunID: UUID?
 
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
-        if let stored = UserDefaults.standard.string(forKey: Constants.userDefaultsKeyCurrentRunID),
-           let uuid = UUID(uuidString: stored) {
-            currentRunID = uuid
-        }
-    }
-
-    // MARK: - Lifecycle
-
-    @MainActor
-    func bootstrap() async {
-        guard let id = currentRunID else { return }
-        if (try? run(withID: id)) == nil {
-            setCurrentRun(nil)
-        }
     }
 
     // MARK: - Run CRUD
@@ -75,17 +60,6 @@ final class RunService {
         try modelContainer.mainContext.save()
     }
 
-    // MARK: - Current run pointer
-
-    func setCurrentRun(_ runID: UUID?) {
-        currentRunID = runID
-        if let runID {
-            UserDefaults.standard.set(runID.uuidString, forKey: Constants.userDefaultsKeyCurrentRunID)
-        } else {
-            UserDefaults.standard.removeObject(forKey: Constants.userDefaultsKeyCurrentRunID)
-        }
-    }
-
     // MARK: - Encounter operations
 
     @MainActor
@@ -98,7 +72,6 @@ final class RunService {
         level: Int?
     ) throws {
         let context = modelContainer.mainContext
-
         let routeEncounter = RouteEncounter()
         routeEncounter.run = run
         routeEncounter.routeID = routeID
