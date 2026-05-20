@@ -1,0 +1,495 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7041AE852FA424C500C107B8 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7041AE842FA424C500C107B8 /* ZIPFoundation */; };
+		A000000000000000000003000 /* NuzlockerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002000 /* NuzlockerApp.swift */; };
+		A000000000000000000003001 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002001 /* AppState.swift */; };
+		A000000000000000000003003 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002003 /* RootView.swift */; };
+		A00000000000000000000301D /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000201D /* Constants.swift */; };
+		A00000000000000000000301E /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000201E /* Game.swift */; };
+		A00000000000000000000301F /* GameVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000201F /* GameVariant.swift */; };
+		A000000000000000000003020 /* Manifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002020 /* Manifest.swift */; };
+		A000000000000000000003021 /* InstallMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002021 /* InstallMeta.swift */; };
+		A000000000000000000003023 /* Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002023 /* Run.swift */; };
+		A000000000000000000003024 /* EncounteredPokemon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002024 /* EncounteredPokemon.swift */; };
+		A000000000000000000003025 /* RouteEncounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002025 /* RouteEncounter.swift */; };
+		A000000000000000000003026 /* RuleSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002026 /* RuleSet.swift */; };
+		A00000000000000000000302B /* RunService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202B /* RunService.swift */; };
+		A00000000000000000000302C /* StorageLocations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202C /* StorageLocations.swift */; };
+		A00000000000000000000302D /* ModelContainerSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202D /* ModelContainerSetup.swift */; };
+		A00000000000000000000302E /* Integrity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202E /* Integrity.swift */; };
+		A00000000000000000000302F /* SpriteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202F /* SpriteImage.swift */; };
+		A000000000000000000003040 /* bundled-manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002040 /* default-manifest.json */; };
+		A000000000000000000003041 /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002041 /* StoreKitConfig.storekit */; };
+		A000000000000000000003042 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002044 /* GameData.swift */; };
+		A000000000000000000003044 /* NuzlockeRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002046 /* NuzlockeRule.swift */; };
+		A000000000000000000003045 /* GameLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002047 /* GameLibrary.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		706B6D572FBD93B600C0B089 /* Nuzlocker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nuzlocker.entitlements; sourceTree = "<group>"; };
+		A000000000000000000002000 /* NuzlockerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NuzlockerApp.swift; sourceTree = "<group>"; };
+		A000000000000000000002001 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		A000000000000000000002003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A00000000000000000000201D /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		A00000000000000000000201E /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		A00000000000000000000201F /* GameVariant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameVariant.swift; sourceTree = "<group>"; };
+		A000000000000000000002020 /* Manifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Manifest.swift; sourceTree = "<group>"; };
+		A000000000000000000002021 /* InstallMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallMeta.swift; sourceTree = "<group>"; };
+		A000000000000000000002023 /* Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Run.swift; sourceTree = "<group>"; };
+		A000000000000000000002024 /* EncounteredPokemon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounteredPokemon.swift; sourceTree = "<group>"; };
+		A000000000000000000002025 /* RouteEncounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteEncounter.swift; sourceTree = "<group>"; };
+		A000000000000000000002026 /* RuleSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleSet.swift; sourceTree = "<group>"; };
+		A00000000000000000000202B /* RunService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunService.swift; sourceTree = "<group>"; };
+		A00000000000000000000202C /* StorageLocations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLocations.swift; sourceTree = "<group>"; };
+		A00000000000000000000202D /* ModelContainerSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContainerSetup.swift; sourceTree = "<group>"; };
+		A00000000000000000000202E /* Integrity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Integrity.swift; sourceTree = "<group>"; };
+		A00000000000000000000202F /* SpriteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteImage.swift; sourceTree = "<group>"; };
+		A000000000000000000002040 /* bundled-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "bundled-manifest.json"; sourceTree = "<group>"; };
+		A000000000000000000002041 /* StoreKitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfig.storekit; sourceTree = "<group>"; };
+		A000000000000000000002042 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A000000000000000000002043 /* Nuzlocker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nuzlocker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A000000000000000000002044 /* GameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameData.swift; sourceTree = "<group>"; };
+		A000000000000000000002046 /* NuzlockeRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NuzlockeRule.swift; sourceTree = "<group>"; };
+		A000000000000000000002047 /* GameLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLibrary.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A000000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7041AE852FA424C500C107B8 /* ZIPFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A000000000000000000000100 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000202C /* StorageLocations.swift */,
+				A00000000000000000000202D /* ModelContainerSetup.swift */,
+				A00000000000000000000202E /* Integrity.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000101 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000202F /* SpriteImage.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000F0 = {
+			isa = PBXGroup;
+			children = (
+				A000000000000000000000F2 /* Nuzlocker */,
+				A000000000000000000000F1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A000000000000000000000F1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A000000000000000000002043 /* Nuzlocker.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000F2 /* Nuzlocker */ = {
+			isa = PBXGroup;
+			children = (
+				706B6D572FBD93B600C0B089 /* Nuzlocker.entitlements */,
+				A000000000000000000002000 /* NuzlockerApp.swift */,
+				A000000000000000000002040 /* bundled-manifest.json */,
+				A000000000000000000002041 /* StoreKitConfig.storekit */,
+				A000000000000000000002042 /* Info.plist */,
+				A000000000000000000000F3 /* App */,
+				A000000000000000000000FA /* Core */,
+			);
+			path = Nuzlocker;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000F3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A000000000000000000002001 /* AppState.swift */,
+				A000000000000000000002003 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000FA /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000201D /* Constants.swift */,
+				A000000000000000000000FB /* Models */,
+				A000000000000000000000FE /* Content */,
+				A000000000000000000000FF /* Run */,
+				A000000000000000000000100 /* Storage */,
+				A000000000000000000000101 /* UI */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000FB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000201E /* Game.swift */,
+				A00000000000000000000201F /* GameVariant.swift */,
+				A000000000000000000002020 /* Manifest.swift */,
+				A000000000000000000002021 /* InstallMeta.swift */,
+				A000000000000000000002044 /* GameData.swift */,
+				A000000000000000000000FC /* Run */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000FC /* Run */ = {
+			isa = PBXGroup;
+			children = (
+				A000000000000000000002023 /* Run.swift */,
+				A000000000000000000002024 /* EncounteredPokemon.swift */,
+				A000000000000000000002025 /* RouteEncounter.swift */,
+				A000000000000000000002026 /* RuleSet.swift */,
+				A000000000000000000002046 /* NuzlockeRule.swift */,
+			);
+			path = Run;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000FE /* Content */ = {
+			isa = PBXGroup;
+			children = (
+				A000000000000000000002047 /* GameLibrary.swift */,
+			);
+			path = Content;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000FF /* Run */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000202B /* RunService.swift */,
+			);
+			path = Run;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A000000000000000000000002 /* Nuzlocker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000000B /* Build configuration list for PBXNativeTarget "Nuzlocker" */;
+			buildPhases = (
+				A000000000000000000000003 /* Sources */,
+				A000000000000000000000004 /* Resources */,
+				A000000000000000000000005 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Nuzlocker;
+			productName = Nuzlocker;
+			productReference = A000000000000000000002043 /* Nuzlocker.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A000000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					A000000000000000000000002 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = A00000000000000000000000A /* Build configuration list for PBXProject "Nuzlocker" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A000000000000000000000F0;
+			packageReferences = (
+				7041AE832FA424C500C107B8 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
+			productRefGroup = A000000000000000000000F1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A000000000000000000000002 /* Nuzlocker */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A000000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A000000000000000000003040 /* bundled-manifest.json in Resources */,
+				A000000000000000000003041 /* StoreKitConfig.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A000000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A000000000000000000003000 /* NuzlockerApp.swift in Sources */,
+				A000000000000000000003001 /* AppState.swift in Sources */,
+				A000000000000000000003003 /* RootView.swift in Sources */,
+				A00000000000000000000301D /* Constants.swift in Sources */,
+				A00000000000000000000301E /* Game.swift in Sources */,
+				A00000000000000000000301F /* GameVariant.swift in Sources */,
+				A000000000000000000003020 /* Manifest.swift in Sources */,
+				A000000000000000000003021 /* InstallMeta.swift in Sources */,
+				A000000000000000000003023 /* Run.swift in Sources */,
+				A000000000000000000003024 /* EncounteredPokemon.swift in Sources */,
+				A000000000000000000003025 /* RouteEncounter.swift in Sources */,
+				A000000000000000000003026 /* RuleSet.swift in Sources */,
+				A00000000000000000000302B /* RunService.swift in Sources */,
+				A00000000000000000000302C /* StorageLocations.swift in Sources */,
+				A00000000000000000000302D /* ModelContainerSetup.swift in Sources */,
+				A00000000000000000000302E /* Integrity.swift in Sources */,
+				A00000000000000000000302F /* SpriteImage.swift in Sources */,
+				A000000000000000000003042 /* GameData.swift in Sources */,
+				A000000000000000000003044 /* NuzlockeRule.swift in Sources */,
+				A000000000000000000003045 /* GameLibrary.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A000000000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLE = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A000000000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLE = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A000000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Nuzlocker/Nuzlocker.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JWCD93SQH9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Nuzlocker/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.nuzlocker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A000000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Nuzlocker/Nuzlocker.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JWCD93SQH9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Nuzlocker/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.nuzlocker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000000A /* Build configuration list for PBXProject "Nuzlocker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A000000000000000000000006 /* Debug */,
+				A000000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000000B /* Build configuration list for PBXNativeTarget "Nuzlocker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A000000000000000000000008 /* Debug */,
+				A000000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7041AE832FA424C500C107B8 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7041AE842FA424C500C107B8 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7041AE832FA424C500C107B8 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A000000000000000000000001 /* Project object */;
+}

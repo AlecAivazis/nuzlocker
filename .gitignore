@@ -1,0 +1,27 @@
+# Generated per dev environment — run scripts/rewrite-manifest.sh to regenerate
+Nuzlocker/default-manifest.json
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SPM
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+*.swp
+
+# Environment
+.env
+
+# Scraper output — generated files, not source of truth
+scrape/output/
+scrape/cache/

@@ -1,0 +1,42 @@
+{
+  "manifestVersion": 1,
+  "updatedAt": "2026-05-19T21:59:07Z",
+  "games": [
+    {
+      "id": "red_blue",
+      "displayName": "Red",
+      "generationID": "gen1",
+      "generationDisplayName": "Generation I",
+      "generationOrder": 1,
+      "variants": [
+        {
+          "id": "red",
+          "displayName": "Red",
+          "zipURL": "https://cdn.example.com/red.zip",
+          "zipSHA256": "1498212769c73c0e2ce03a16b22091a62defd00d270cb1c393d5e9e9ba883326",
+          "sizeBytes": 181401,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        }
+      ]
+    },
+    {
+      "id": "heartgold_soulsilver",
+      "displayName": "SoulSilver",
+      "generationID": "gen4",
+      "generationDisplayName": "Generation IV",
+      "generationOrder": 4,
+      "variants": [
+        {
+          "id": "soulsilver",
+          "displayName": "SoulSilver",
+          "zipURL": "https://cdn.example.com/soulsilver.zip",
+          "zipSHA256": "58df8fe29ae3307aaf089dcb4ae107a303ea4fd48370f3a1690f232063e7377b",
+          "sizeBytes": 518640,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        }
+      ]
+    }
+  ]
+}

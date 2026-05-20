@@ -1,0 +1,75 @@
+{
+  "manifestVersion": 1,
+  "updatedAt": "2026-04-30T23:11:47Z",
+  "games": [
+    {
+      "id": "red_blue",
+      "displayName": "Test Red/Blue",
+      "generation": 1,
+      "generationDisplayName": "Generation I",
+      "variants": [
+        {
+          "id": "red",
+          "displayName": "Test Red",
+          "zipURL": "http://localhost:8080/red.zip",
+          "zipSHA256": "ebb9f57af20c18ccf329587bf777a192efbca39d23c0da932df6610825304378",
+          "sizeBytes": 2591,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        },
+        {
+          "id": "blue",
+          "displayName": "Test Blue",
+          "zipURL": "http://localhost:8080/blue.zip",
+          "zipSHA256": "a0cec9720ff6d7760fea80e72a80be13cb85832e2993aa06ffbfa92be73f2b3d",
+          "sizeBytes": 2597,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        }
+      ]
+    },
+    {
+      "id": "yellow",
+      "displayName": "Test Yellow",
+      "generation": 1,
+      "generationDisplayName": "Generation I",
+      "variants": [
+        {
+          "id": "yellow",
+          "displayName": "Test Yellow",
+          "zipURL": "http://localhost:8080/yellow.zip",
+          "zipSHA256": "c43fbd3cab2028fd85cef1b1317b52898cdbbff6f7619503469a3c71ec80ea21",
+          "sizeBytes": 2589,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        }
+      ]
+    },
+    {
+      "id": "gold_silver",
+      "displayName": "Test Gold/Silver",
+      "generation": 2,
+      "generationDisplayName": "Generation II",
+      "variants": [
+        {
+          "id": "gold",
+          "displayName": "Test Gold",
+          "zipURL": "http://localhost:8080/gold.zip",
+          "zipSHA256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "sizeBytes": 0,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        },
+        {
+          "id": "silver",
+          "displayName": "Test Silver",
+          "zipURL": "http://localhost:8080/silver.zip",
+          "zipSHA256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "sizeBytes": 0,
+          "contentVersion": "1.0.0",
+          "layoutVersion": 1
+        }
+      ]
+    }
+  ]
+}
