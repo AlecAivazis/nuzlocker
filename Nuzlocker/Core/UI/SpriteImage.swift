@@ -4,7 +4,7 @@ import UIKit
 private let spriteCache = NSCache<NSString, UIImage>()
 
 struct SpriteImage: View {
-    let variantID: String
+    let gameID: String
     let monsterNumber: Int
     var size: CGFloat = 64
 
@@ -30,11 +30,11 @@ struct SpriteImage: View {
     }
 
     private func loadImage() -> UIImage? {
-        let key = "\(variantID)-\(monsterNumber)" as NSString
+        let key = "\(gameID)-\(monsterNumber)" as NSString
         if let cached = spriteCache.object(forKey: key) { return cached }
 
         let filename = String(format: "%03d.png", monsterNumber)
-        let path = StorageLocations.variantDir(variantID)
+        let path = StorageLocations.variantDir(gameID)
             .appendingPathComponent("sprites")
             .appendingPathComponent(filename)
             .path

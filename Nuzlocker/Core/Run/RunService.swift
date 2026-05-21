@@ -17,7 +17,6 @@ final class RunService {
         name: String,
         generation: Int,
         gameID: String,
-        variantID: String,
         ruleSet: RuleSet
     ) throws -> Run {
         let context = modelContainer.mainContext
@@ -25,7 +24,6 @@ final class RunService {
         run.name = name
         run.generation = generation
         run.gameID = gameID
-        run.variantID = variantID
         run.ruleSet = ruleSet
         context.insert(run)
         try context.save()

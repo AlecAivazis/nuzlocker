@@ -16,7 +16,7 @@ final class AppState {
     }
 
     var currentVariantContent: VariantContent? {
-        currentRun.flatMap { library.content(for: $0.variantID) }
+        currentRun.flatMap { library.content(for: $0.gameID) }
     }
 
     // MARK: - Init

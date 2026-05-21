@@ -118,8 +118,7 @@ def main():
 
     # Write .install-meta.json to mirror what the app's install flow produces
     meta = {
-        "variantID":      entry["variantID"],
-        "gameID":         entry["gameID"],
+        "gameID":         entry["variantID"],
         "generation":     entry["generation"],
         "contentVersion": entry["contentVersion"],
         "layoutVersion":  entry["layoutVersion"],

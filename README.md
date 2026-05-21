@@ -90,55 +90,54 @@ The scraper writes an intermediate `output/manifest.json` with per-variant metad
   "updatedAt": "2026-05-20T00:00:00Z",
   "games": [
     {
-      "id":                    "heartgold_soulsilver",
-      "displayName":           "HeartGold / SoulSilver",
+      "id":                    "heartgold",
+      "displayName":           "HeartGold",
       "generation":            4,
       "generationDisplayName": "Generation IV",
-      "variants": [
-        {
-          "id":             "soulsilver",
-          "displayName":    "SoulSilver",
-          "zipURL":         "https://cdn.example.com/variants/soulsilver.zip",
-          "zipSHA256":      "abc123…",
-          "sizeBytes":      12345678,
-          "contentVersion": "1.0.0",
-          "layoutVersion":  1
-        }
-      ]
+      "zipURL":                "https://cdn.example.com/heartgold.zip",
+      "zipSHA256":             "abc123…",
+      "sizeBytes":             12345678,
+      "contentVersion":        "1.0.0",
+      "layoutVersion":         1
+    },
+    {
+      "id":                    "soulsilver",
+      "displayName":           "SoulSilver",
+      "generation":            4,
+      "generationDisplayName": "Generation IV",
+      "zipURL":                "https://cdn.example.com/soulsilver.zip",
+      "zipSHA256":             "def456…",
+      "sizeBytes":             12398123,
+      "contentVersion":        "1.0.0",
+      "layoutVersion":         1
     }
   ]
 }
 ```
 
+Each game is a flat entry — grouping paired versions (HeartGold/SoulSilver, Red/Blue) is a UI concern, not a manifest concern.
+
 **`Manifest`**
 
-| Field             | Type       | Description                                          |
-| ----------------- | ---------- | ---------------------------------------------------- |
-| `manifestVersion` | integer    | Schema version; increment on breaking changes        |
-| `updatedAt`       | ISO 8601   | Timestamp of last update                             |
-| `games`           | `Game[]`   | All purchasable games, grouped by version-group      |
+| Field             | Type       | Description                                   |
+| ----------------- | ---------- | --------------------------------------------- |
+| `manifestVersion` | integer    | Schema version; increment on breaking changes |
+| `updatedAt`       | ISO 8601   | Timestamp of last update                      |
+| `games`           | `Game[]`   | All purchasable games                         |
 
 **`Game`**
 
-| Field                  | Type           | Description                                              |
-| ---------------------- | -------------- | -------------------------------------------------------- |
-| `id`                   | string         | Version-group identifier (e.g. `"heartgold_soulsilver"`) |
-| `displayName`          | string         | Human-readable group title (e.g. `"HeartGold / SoulSilver"`) |
-| `generation`           | integer        | Generation number (1–9)                                  |
-| `generationDisplayName`| string         | Human-readable generation label (e.g. `"Generation IV"`) |
-| `variants`             | `GameVariant[]`| Individual version variants within this group            |
-
-**`GameVariant`**
-
-| Field            | Type    | Description                                                       |
-| ---------------- | ------- | ----------------------------------------------------------------- |
-| `id`             | string  | Variant identifier (e.g. `"soulsilver"`)                          |
-| `displayName`    | string  | Human-readable version title                                      |
-| `zipURL`         | string  | CDN URL for the variant ZIP                                       |
-| `zipSHA256`      | string  | SHA-256 hex digest of the ZIP; verified before install            |
-| `sizeBytes`      | integer | Compressed ZIP size in bytes; shown in the download UI            |
-| `contentVersion` | string  | Semver string; bump when game data changes                        |
-| `layoutVersion`  | integer | ZIP layout schema version; app evicts cached installs on mismatch |
+| Field                   | Type    | Description                                                       |
+| ----------------------- | ------- | ----------------------------------------------------------------- |
+| `id`                    | string  | Game identifier (e.g. `"soulsilver"`)                             |
+| `displayName`           | string  | Human-readable title (e.g. `"SoulSilver"`)                        |
+| `generation`            | integer | Generation number (1–9)                                           |
+| `generationDisplayName` | string  | Human-readable generation label (e.g. `"Generation IV"`)          |
+| `zipURL`                | string  | CDN URL for the game ZIP                                          |
+| `zipSHA256`             | string  | SHA-256 hex digest of the ZIP; verified before install            |
+| `sizeBytes`             | integer | Compressed ZIP size in bytes; shown in the download UI            |
+| `contentVersion`        | string  | Semver string; bump when game data changes                        |
+| `layoutVersion`         | integer | ZIP layout schema version; app evicts cached installs on mismatch |
 
 ### Variant ZIP
 

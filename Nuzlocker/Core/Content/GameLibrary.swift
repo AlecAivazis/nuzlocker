@@ -9,14 +9,14 @@ final class GameLibrary {
     // MARK: - Observable state
 
     private(set) var games: [Game] = []
-    private(set) var installedVariantIDs: Set<String> = []
+    private(set) var installedGameIDs: Set<String> = []
     private(set) var freePicksRemaining: Int = 0
 
     // MARK: - Private
 
     private var purchasedGameIDs: Set<String> = []
     private var freePickGameIDs: Set<String> = []
-    private var gameDataCache: [String: VariantContent] = [:]
+    private var contentCache: [String: VariantContent] = [:]
     private var speciesCache: [String: SpeciesContent] = [:]
     private let kvs = NSUbiquitousKeyValueStore.default
     private let downloader = Downloader()
@@ -50,8 +50,8 @@ final class GameLibrary {
 
     // MARK: - Queries
 
-    func isInstalled(_ variantID: String) -> Bool {
-        installedVariantIDs.contains(variantID)
+    func isInstalled(_ gameID: String) -> Bool {
+        installedGameIDs.contains(gameID)
     }
 
     func isAvailable(_ game: Game) -> Bool {
@@ -60,14 +60,6 @@ final class GameLibrary {
 
     func game(withID id: String) -> Game? {
         games.first { $0.id == id }
-    }
-
-    func game(forVariantID variantID: String) -> Game? {
-        games.first { $0.variants.contains { $0.id == variantID } }
-    }
-
-    func variant(withID id: String) -> GameVariant? {
-        games.flatMap(\.variants).first { $0.id == id }
     }
 
     func gamesByGeneration() -> [(Int, String, [Game])] {
@@ -88,70 +80,67 @@ final class GameLibrary {
     // MARK: - Acquisition
 
     func purchaseAndInstall(
-        _ variant: GameVariant,
-        for game: Game,
+        _ game: Game,
         onProgress: ((Double) -> Void)? = nil
     ) async throws {
         let transaction = try await purchase(game)
-        let zipURL = try await download(variant, onProgress: onProgress)
-        try await install(zipAt: zipURL, variant: variant, game: game)
+        let zipURL = try await download(game, onProgress: onProgress)
+        try await install(zipAt: zipURL, game: game)
         await transaction.finish()
         await refreshEntitlements()
     }
 
     func claimFreeAndInstall(
-        _ variant: GameVariant,
-        for game: Game,
+        _ game: Game,
         onProgress: ((Double) -> Void)? = nil
     ) async throws {
         guard claimFreePick(game.id) else { throw LibraryError.freePickUnavailable }
-        if !isInstalled(variant.id) {
-            let zipURL = try await download(variant, onProgress: onProgress)
-            try await install(zipAt: zipURL, variant: variant, game: game)
+        if !isInstalled(game.id) {
+            let zipURL = try await download(game, onProgress: onProgress)
+            try await install(zipAt: zipURL, game: game)
         }
     }
 
     func installOwned(
-        _ variant: GameVariant,
-        for game: Game,
+        _ game: Game,
         onProgress: ((Double) -> Void)? = nil
     ) async throws {
-        guard isAvailable(game), !isInstalled(variant.id) else { return }
-        let zipURL = try await download(variant, onProgress: onProgress)
-        try await install(zipAt: zipURL, variant: variant, game: game)
+        guard isAvailable(game), !isInstalled(game.id) else { return }
+        let zipURL = try await download(game, onProgress: onProgress)
+        try await install(zipAt: zipURL, game: game)
     }
 
-    func remove(_ variantID: String) async throws {
-        try FileManager.default.removeItem(at: StorageLocations.variantDir(variantID))
+    func remove(_ gameID: String) async throws {
+        try FileManager.default.removeItem(at: StorageLocations.variantDir(gameID))
         await MainActor.run {
-            installedVariantIDs.remove(variantID)
-            gameDataCache.removeValue(forKey: variantID)
-            speciesCache.removeValue(forKey: variantID)
+            installedGameIDs.remove(gameID)
+            contentCache.removeValue(forKey: gameID)
+            speciesCache.removeValue(forKey: gameID)
         }
     }
 
     // MARK: - Content
 
-    func content(for variantID: String) -> VariantContent? {
-        if let cached = gameDataCache[variantID] { return cached }
-        let url = StorageLocations.variantDir(variantID).appendingPathComponent("game.json")
+    func content(for gameID: String) -> VariantContent? {
+        if let cached = contentCache[gameID] { return cached }
+        let url = StorageLocations.variantDir(gameID).appendingPathComponent("game.json")
         guard let data = try? Data(contentsOf: url),
               let gd = try? JSONDecoder().decode(VariantContent.self, from: data) else { return nil }
-        gameDataCache[variantID] = gd
+        contentCache[gameID] = gd
         return gd
     }
 
-    func speciesContent(for variantID: String) -> SpeciesContent? {
-        if let cached = speciesCache[variantID] { return cached }
-        let url = StorageLocations.variantDir(variantID).appendingPathComponent("species.json")
+    func speciesContent(for gameID: String) -> SpeciesContent? {
+        if let cached = speciesCache[gameID] { return cached }
+        let url = StorageLocations.variantDir(gameID).appendingPathComponent("species.json")
         guard let data = try? Data(contentsOf: url),
               let sc = try? JSONDecoder().decode(SpeciesContent.self, from: data) else { return nil }
-        speciesCache[variantID] = sc
+        speciesCache[gameID] = sc
         return sc
     }
 
-    func routeDisplayName(for routeID: String, variantID: String) -> String {
-        content(for: variantID)?.routes.first { $0.id == routeID }?.displayName ?? routeID
+    func routeDisplayName(for routeID: String, gameID: String) -> String {
+        content(for: gameID)?.routes.first { $0.id == routeID }?.displayName ?? routeID
     }
 
     func restorePurchases() async throws {
@@ -269,8 +258,8 @@ final class GameLibrary {
 
         var installed = Set<String>()
         for dir in dirs {
-            let variantID = dir.lastPathComponent
-            guard let data = try? Data(contentsOf: StorageLocations.installMeta(variantID)),
+            let gameID = dir.lastPathComponent
+            guard let data = try? Data(contentsOf: StorageLocations.installMeta(gameID)),
                   let meta = try? JSONDecoder().decode(InstallMeta.self, from: data) else {
                 try? FileManager.default.removeItem(at: dir)
                 continue
@@ -279,16 +268,16 @@ final class GameLibrary {
                 try? FileManager.default.removeItem(at: dir)
                 continue
             }
-            installed.insert(variantID)
+            installed.insert(gameID)
         }
-        await MainActor.run { installedVariantIDs = installed }
+        await MainActor.run { installedGameIDs = installed }
     }
 
     private func download(
-        _ variant: GameVariant,
+        _ game: Game,
         onProgress: ((Double) -> Void)?
     ) async throws -> URL {
-        for await event in downloader.start(variant) {
+        for await event in downloader.start(gameID: game.id, url: game.zipURL) {
             switch event {
             case .progress(let done, let total):
                 if total > 0 { onProgress?(Double(done) / Double(total)) }
@@ -301,14 +290,14 @@ final class GameLibrary {
         throw LibraryError.downloadFailed
     }
 
-    private func install(zipAt: URL, variant: GameVariant, game: Game) async throws {
+    private func install(zipAt: URL, game: Game) async throws {
         let actualHash = try await Integrity.sha256(of: zipAt)
-        guard actualHash == variant.zipSHA256 else {
-            throw IntegrityError.checksumMismatch(expected: variant.zipSHA256, actual: actualHash)
+        guard actualHash == game.zipSHA256 else {
+            throw IntegrityError.checksumMismatch(expected: game.zipSHA256, actual: actualHash)
         }
 
         let fm = FileManager.default
-        let stagingDir = StorageLocations.stagingRoot.appendingPathComponent(variant.id, isDirectory: true)
+        let stagingDir = StorageLocations.stagingRoot.appendingPathComponent(game.id, isDirectory: true)
         try? fm.removeItem(at: stagingDir)
         try fm.createDirectory(at: stagingDir, withIntermediateDirectories: true)
 
@@ -323,29 +312,28 @@ final class GameLibrary {
         let gameJSONURL = stagingDir.appendingPathComponent("game.json")
         guard let gameData = try? Data(contentsOf: gameJSONURL),
               let idCheck = try? JSONDecoder().decode(VariantIDCheck.self, from: gameData),
-              idCheck.variantID == variant.id else {
+              idCheck.variantID == game.id else {
             try? fm.removeItem(at: stagingDir)
             throw LibraryError.invalidContent
         }
 
-        let destDir = StorageLocations.variantDir(variant.id)
+        let destDir = StorageLocations.variantDir(game.id)
         try? fm.removeItem(at: destDir)
         _ = try fm.replaceItemAt(destDir, withItemAt: stagingDir)
 
         let meta = InstallMeta(
-            variantID: variant.id,
             gameID: game.id,
             generation: game.generation,
-            contentVersion: variant.contentVersion,
-            layoutVersion: variant.layoutVersion,
+            contentVersion: game.contentVersion,
+            layoutVersion: game.layoutVersion,
             installedAt: Date(),
-            zipSHA256: variant.zipSHA256
+            zipSHA256: game.zipSHA256
         )
-        try JSONEncoder().encode(meta).write(to: StorageLocations.installMeta(variant.id))
+        try JSONEncoder().encode(meta).write(to: StorageLocations.installMeta(game.id))
         try? StorageLocations.setExcludedFromBackup(destDir)
         try? fm.removeItem(at: zipAt)
 
-        await MainActor.run { installedVariantIDs.insert(variant.id) }
+        await MainActor.run { installedGameIDs.insert(game.id) }
     }
 }
 
@@ -389,7 +377,7 @@ private final class Downloader: NSObject, URLSessionDownloadDelegate {
     private var session: URLSession!
     private var continuations: [String: AsyncStream<DownloadEvent>.Continuation] = [:]
     private var resumeDataMap: [String: Data] = [:]
-    private var taskVariantMap: [URLSessionTask: String] = [:]
+    private var taskGameMap: [URLSessionTask: String] = [:]
 
     override init() {
         super.init()
@@ -398,53 +386,53 @@ private final class Downloader: NSObject, URLSessionDownloadDelegate {
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }
 
-    func start(_ variant: GameVariant) -> AsyncStream<DownloadEvent> {
+    func start(gameID: String, url: URL) -> AsyncStream<DownloadEvent> {
         AsyncStream { continuation in
-            self.continuations[variant.id] = continuation
+            self.continuations[gameID] = continuation
             let task: URLSessionDownloadTask
-            if let resumeData = self.resumeDataMap[variant.id] {
+            if let resumeData = self.resumeDataMap[gameID] {
                 task = self.session.downloadTask(withResumeData: resumeData)
             } else {
-                task = self.session.downloadTask(with: variant.zipURL)
+                task = self.session.downloadTask(with: url)
             }
-            self.taskVariantMap[task] = variant.id
+            self.taskGameMap[task] = gameID
             task.resume()
         }
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
                     didFinishDownloadingTo location: URL) {
-        guard let variantID = taskVariantMap[downloadTask] else { return }
-        let dest = StorageLocations.stagingRoot.appendingPathComponent("\(variantID).zip")
+        guard let gameID = taskGameMap[downloadTask] else { return }
+        let dest = StorageLocations.stagingRoot.appendingPathComponent("\(gameID).zip")
         try? FileManager.default.removeItem(at: dest)
         do {
             try FileManager.default.moveItem(at: location, to: dest)
-            continuations[variantID]?.yield(.completed(localURL: dest))
+            continuations[gameID]?.yield(.completed(localURL: dest))
         } catch {
-            continuations[variantID]?.yield(.failed(error, resumeData: nil))
+            continuations[gameID]?.yield(.failed(error, resumeData: nil))
         }
-        continuations[variantID]?.finish()
-        continuations.removeValue(forKey: variantID)
-        taskVariantMap.removeValue(forKey: downloadTask)
-        resumeDataMap.removeValue(forKey: variantID)
+        continuations[gameID]?.finish()
+        continuations.removeValue(forKey: gameID)
+        taskGameMap.removeValue(forKey: downloadTask)
+        resumeDataMap.removeValue(forKey: gameID)
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
                     didWriteData _: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        guard let variantID = taskVariantMap[downloadTask] else { return }
-        continuations[variantID]?.yield(.progress(
+        guard let gameID = taskGameMap[downloadTask] else { return }
+        continuations[gameID]?.yield(.progress(
             bytesDownloaded: totalBytesWritten,
             totalBytes: totalBytesExpectedToWrite
         ))
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        guard let error, let variantID = taskVariantMap[task] else { return }
+        guard let error, let gameID = taskGameMap[task] else { return }
         let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data
-        if let resumeData { resumeDataMap[variantID] = resumeData }
-        continuations[variantID]?.yield(.failed(error, resumeData: resumeData))
-        continuations[variantID]?.finish()
-        continuations.removeValue(forKey: variantID)
-        taskVariantMap.removeValue(forKey: task)
+        if let resumeData { resumeDataMap[gameID] = resumeData }
+        continuations[gameID]?.yield(.failed(error, resumeData: resumeData))
+        continuations[gameID]?.finish()
+        continuations.removeValue(forKey: gameID)
+        taskGameMap.removeValue(forKey: task)
     }
 }

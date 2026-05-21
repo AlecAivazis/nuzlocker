@@ -7,7 +7,6 @@ final class Run {
     var name: String = ""
     var generation: Int = 0
     var gameID: String = ""
-    var variantID: String = ""
     var startedAt: Date = Date()
     var lastPlayedAt: Date = Date()
     var status: RunStatus = RunStatus.active

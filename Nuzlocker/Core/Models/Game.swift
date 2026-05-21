@@ -5,5 +5,9 @@ struct Game: Codable, Identifiable, Hashable {
     let displayName: String
     let generation: Int
     let generationDisplayName: String
-    let variants: [GameVariant]
+    let zipURL: URL
+    let zipSHA256: String
+    let sizeBytes: Int64
+    let contentVersion: String
+    let layoutVersion: Int
 }
