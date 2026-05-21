@@ -27,7 +27,7 @@
 		A00000000000000000000302F /* SpriteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202F /* SpriteImage.swift */; };
 		A000000000000000000003040 /* bundled-manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002040 /* default-manifest.json */; };
 		A000000000000000000003041 /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002041 /* StoreKitConfig.storekit */; };
-		A000000000000000000003042 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002044 /* GameData.swift */; };
+		A000000000000000000003042 /* VariantContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002044 /* VariantContent.swift */; };
 		A000000000000000000003044 /* NuzlockeRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002046 /* NuzlockeRule.swift */; };
 		A000000000000000000003045 /* GameLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000002047 /* GameLibrary.swift */; };
 /* End PBXBuildFile section */
@@ -55,7 +55,7 @@
 		A000000000000000000002041 /* StoreKitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfig.storekit; sourceTree = "<group>"; };
 		A000000000000000000002042 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A000000000000000000002043 /* Nuzlocker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nuzlocker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A000000000000000000002044 /* GameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameData.swift; sourceTree = "<group>"; };
+		A000000000000000000002044 /* VariantContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VariantContent.swift; sourceTree = "<group>"; };
 		A000000000000000000002046 /* NuzlockeRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NuzlockeRule.swift; sourceTree = "<group>"; };
 		A000000000000000000002047 /* GameLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLibrary.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,7 +149,7 @@
 				A00000000000000000000201F /* GameVariant.swift */,
 				A000000000000000000002020 /* Manifest.swift */,
 				A000000000000000000002021 /* InstallMeta.swift */,
-				A000000000000000000002044 /* GameData.swift */,
+				A000000000000000000002044 /* VariantContent.swift */,
 				A000000000000000000000FC /* Run */,
 			);
 			path = Models;
@@ -273,7 +273,7 @@
 				A00000000000000000000302D /* ModelContainerSetup.swift in Sources */,
 				A00000000000000000000302E /* Integrity.swift in Sources */,
 				A00000000000000000000302F /* SpriteImage.swift in Sources */,
-				A000000000000000000003042 /* GameData.swift in Sources */,
+				A000000000000000000003042 /* VariantContent.swift in Sources */,
 				A000000000000000000003044 /* NuzlockeRule.swift in Sources */,
 				A000000000000000000003045 /* GameLibrary.swift in Sources */,
 			);

@@ -16,7 +16,7 @@ final class GameLibrary {
 
     private var purchasedGameIDs: Set<String> = []
     private var freePickGameIDs: Set<String> = []
-    private var gameDataCache: [String: GameData] = [:]
+    private var gameDataCache: [String: VariantContent] = [:]
     private let kvs = NSUbiquitousKeyValueStore.default
     private let downloader = Downloader()
 
@@ -130,17 +130,23 @@ final class GameLibrary {
 
     // MARK: - Content
 
-    func gameData(for variantID: String) -> GameData? {
+    func content(for variantID: String) -> VariantContent? {
         if let cached = gameDataCache[variantID] { return cached }
         let url = StorageLocations.variantDir(variantID).appendingPathComponent("game.json")
         guard let data = try? Data(contentsOf: url),
-              let gd = try? JSONDecoder().decode(GameData.self, from: data) else { return nil }
+              let gd = try? JSONDecoder().decode(VariantContent.self, from: data) else { return nil }
         gameDataCache[variantID] = gd
         return gd
     }
 
+    func pokedexContent(for variantID: String) -> PokedexContent? {
+        let url = StorageLocations.variantDir(variantID).appendingPathComponent("pokedex.json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(PokedexContent.self, from: data)
+    }
+
     func routeDisplayName(for routeID: String, variantID: String) -> String {
-        gameData(for: variantID)?.routes.first { $0.id == routeID }?.displayName ?? routeID
+        content(for: variantID)?.routes.first { $0.id == routeID }?.displayName ?? routeID
     }
 
     func restorePurchases() async throws {
@@ -173,15 +179,9 @@ final class GameLibrary {
     }()
 
     private func loadCatalog() {
-        if let data = try? Data(contentsOf: StorageLocations.manifestCache),
-           let manifest = try? Self.decoder.decode(Manifest.self, from: data) {
-            games = manifest.games
-            return
-        }
-        guard let url = Bundle.main.url(forResource: "bundled-manifest", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
+        guard let data = try? Data(contentsOf: StorageLocations.manifestCache),
               let manifest = try? Self.decoder.decode(Manifest.self, from: data) else {
-            fatalError("bundled-manifest.json missing or malformed")
+            return  // No cache yet — games stays empty until refreshCatalog() succeeds
         }
         games = manifest.games
     }
@@ -310,10 +310,10 @@ final class GameLibrary {
             }
         }.value
 
-        let innerManifestURL = stagingDir.appendingPathComponent("manifest.json")
-        guard let manifestData = try? Data(contentsOf: innerManifestURL),
-              let inner = try? JSONDecoder().decode(VariantManifest.self, from: manifestData),
-              inner.variantID == variant.id else {
+        let gameJSONURL = stagingDir.appendingPathComponent("game.json")
+        guard let gameData = try? Data(contentsOf: gameJSONURL),
+              let idCheck = try? JSONDecoder().decode(VariantIDCheck.self, from: gameData),
+              idCheck.variantID == variant.id else {
             try? fm.removeItem(at: stagingDir)
             throw LibraryError.invalidContent
         }
@@ -365,13 +365,8 @@ enum LibraryError: LocalizedError {
 
 // MARK: - Private types
 
-private struct VariantManifest: Codable {
+private struct VariantIDCheck: Codable {
     let variantID: String
-    let gameID: String
-    let generation: Int
-    let displayName: String
-    let contentVersion: String
-    let layoutVersion: Int
 }
 
 private enum DownloadEvent {

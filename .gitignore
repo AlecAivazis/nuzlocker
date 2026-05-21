@@ -25,3 +25,8 @@ DerivedData/
 # Scraper output — generated files, not source of truth
 scrape/output/
 scrape/cache/
+scrape/.venv/
+
+# Python
+**/__pycache__/
+*.pyc

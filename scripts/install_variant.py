@@ -9,18 +9,21 @@ Examples:
     python3 scripts/install_variant.py red
     python3 scripts/install_variant.py soulsilver --device <UDID>
 
-The script extracts variants/<variantID>.zip to the right Application Support
-path and writes .install-meta.json so InstallService recognises it as installed.
+Reads the ZIP from scrape/output/<variantID>.zip and metadata from
+scrape/output/manifest.json. Run scrape.py for the variant first.
 """
 
 import argparse, hashlib, json, shutil, subprocess, sys, zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-FIXTURES_DIR = ROOT / "variants"
+# JSONEncoder()/JSONDecoder() use Swift's reference date (Jan 1, 2001 UTC) for
+# Date values. This offset converts a Unix timestamp to that epoch.
+_APPLE_EPOCH = datetime(2001, 1, 1, tzinfo=timezone.utc)
+
+ROOT          = Path(__file__).resolve().parent.parent
+SCRAPE_OUTPUT = ROOT / "scrape" / "output"
 DEFAULT_BUNDLE_ID = "com.example.nuzlocker"
-LAYOUT_VERSION = 1
 
 
 def run(cmd, **kwargs):
@@ -61,39 +64,44 @@ def sha256_of(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("variant_id", help="Variant to install (e.g. red, soulsilver)")
-    parser.add_argument("--bundle-id", default=DEFAULT_BUNDLE_ID, help="App bundle ID")
+    parser.add_argument("--bundle-id", default=DEFAULT_BUNDLE_ID)
     parser.add_argument("--device", default=None, help="Simulator UDID (default: booted device)")
     args = parser.parse_args()
 
-    zip_path = FIXTURES_DIR / f"{args.variant_id}.zip"
+    zip_path = SCRAPE_OUTPUT / f"{args.variant_id}.zip"
     if not zip_path.exists():
         sys.exit(
-            f"variants/{args.variant_id}.zip not found.\n"
-            "Run scripts/make-variants.sh first."
+            f"scrape/output/{args.variant_id}.zip not found.\n"
+            f"Run: cd scrape && python3 scrape.py {args.variant_id}"
         )
 
-    # Read variant manifest from inside the ZIP
-    with zipfile.ZipFile(zip_path) as zf:
-        try:
-            inner = json.loads(zf.read("manifest.json"))
-        except KeyError:
-            sys.exit(f"{zip_path.name} is missing manifest.json — re-run make-variants.sh.")
+    # Read variant metadata from the scraper's global manifest
+    manifest_path = SCRAPE_OUTPUT / "manifest.json"
+    if not manifest_path.exists():
+        sys.exit("scrape/output/manifest.json not found. Run scrape.py first.")
+    manifest = json.loads(manifest_path.read_text())
+    entry = next((v for v in manifest["variants"] if v["variantID"] == args.variant_id), None)
+    if entry is None:
+        sys.exit(
+            f"No manifest entry for '{args.variant_id}'.\n"
+            f"Run: cd scrape && python3 scrape.py {args.variant_id}"
+        )
 
-    variant_id = inner["variantID"]
-    game_id = inner["gameID"]
-    generation = inner["generation"]
-    display_name = inner["displayName"]
-    content_version = inner["contentVersion"]
-    layout_version = inner["layoutVersion"]
+    # Validate ZIP content: game.json must exist and variantID must match
+    with zipfile.ZipFile(zip_path) as zf:
+        if "game.json" not in zf.namelist():
+            sys.exit(f"{zip_path.name} is missing game.json — re-run scrape.py.")
+        game_data = json.loads(zf.read("game.json"))
+        if game_data.get("variantID") != args.variant_id:
+            sys.exit(f"variantID mismatch in game.json — re-run scrape.py.")
 
     udid = booted_udid(args.device)
     print(f"Simulator: {udid}")
 
-    container = app_data_container(udid, args.bundle_id)
+    container    = app_data_container(udid, args.bundle_id)
     variants_root = container / "Library" / "Application Support" / "Nuzlocker" / "Variants"
-    variant_dir = variants_root / variant_id
+    variant_dir  = variants_root / args.variant_id
 
-    # Extract ZIP
     print(f"Installing {zip_path.name} → {variant_dir}")
     if variant_dir.exists():
         shutil.rmtree(variant_dir)
@@ -108,20 +116,19 @@ def main():
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_bytes(zf.read(member.filename))
 
-    # Write .install-meta.json (mirrors InstallService's output)
+    # Write .install-meta.json to mirror what the app's install flow produces
     meta = {
-        "variantID": variant_id,
-        "gameID": game_id,
-        "generation": generation,
-        "contentVersion": content_version,
-        "layoutVersion": layout_version,
-        "installedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "zipSHA256": sha256_of(zip_path),
+        "variantID":      entry["variantID"],
+        "gameID":         entry["gameID"],
+        "generation":     entry["generation"],
+        "contentVersion": entry["contentVersion"],
+        "layoutVersion":  entry["layoutVersion"],
+        "installedAt":    (datetime.now(timezone.utc) - _APPLE_EPOCH).total_seconds(),
+        "zipSHA256":      sha256_of(zip_path),
     }
-    meta_path = variant_dir / ".install-meta.json"
-    meta_path.write_text(json.dumps(meta, indent=2))
+    (variant_dir / ".install-meta.json").write_text(json.dumps(meta, indent=2))
 
-    print(f"Done. {display_name} ({variant_id}) installed.")
+    print(f"Done. {entry['displayName']} ({args.variant_id}) installed.")
     print("Restart the app in the simulator to pick up the new data.")
 
 

@@ -5,8 +5,7 @@ A native iOS companion app for Pokémon Nuzlocke runs. Tracks encounters, party 
 ## Prerequisites
 
 - **Xcode 15+** — iOS 17 SDK required (SwiftData, `@Observable`, StoreKit 2)
-- **Python 3.9+** — for the scraper and local dev scripts
-- **`jq`** — for `rewrite-manifest.sh`: `brew install jq`
+- **Python 3.13** — for the scraper venv (`python3.13 -m venv`)
 - **Apple Developer account** — free tier works for simulator; paid required for device builds and CloudKit
 
 ## One-time setup
@@ -18,7 +17,7 @@ A native iOS companion app for Pokémon Nuzlocke runs. Tracks encounters, party 
    - **Background Modes** → Remote notifications
 4. Update `cloudKitContainerID` in `Core/Constants.swift` to match your auto-generated container (typically `iCloud.<your-bundle-id>`).
 5. Confirm the scheme uses `StoreKitConfig.storekit`: **Edit Scheme → Run → Options → StoreKit Configuration**.
-6. Install scraper dependencies: `cd scrape && pip install -r requirements.txt`
+6. Install scraper dependencies: `cd scrape && python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt`
 
 ## Local development
 
@@ -37,13 +36,15 @@ This runs the full pipeline — scrape → package → install — and prompts y
 To test the IAP → download → install path instead of injecting directly:
 
 ```bash
-# Terminal 1
-scripts/serve-variants.sh          # serves variants/ on localhost:8080
+# Terminal 1 — serve ZIPs and manifest from scrape/output/
+scripts/serve-variants.sh
 
-# Terminal 2 — rewrite manifest URLs, then build and run
-scripts/rewrite-manifest.sh        # simulator
-scripts/rewrite-manifest.sh <LAN-IP>  # physical device
+# Terminal 2 — generate cdn-manifest.json with local URLs
+scripts/rewrite-manifest.sh              # simulator (localhost:8080)
+scripts/rewrite-manifest.sh 192.168.1.42 # physical device (LAN IP, port 8080)
 ```
+
+The script prints the URL to paste into `remoteManifestURL` in `Core/Constants.swift`. Rebuild the app after updating it. Revert `Constants.swift` before committing.
 
 ## Common tasks
 
@@ -54,7 +55,7 @@ scripts/rewrite-manifest.sh <LAN-IP>  # physical device
 | Reset StoreKit purchases | Xcode → Debug → StoreKit → Manage Transactions → delete all          |
 | Wipe iCloud KVS          | Debug screen (long-press version label in Settings → About)          |
 | Simulate iCloud off      | Debug screen toggle, or Simulator → Settings → Sign Out of iCloud    |
-| Test on device           | `scripts/rewrite-manifest.sh <LAN-IP>`; Mac and device on same Wi-Fi |
+| Test on device           | `scripts/rewrite-manifest.sh <LAN-IP>`; update `remoteManifestURL`; Mac and device on same Wi-Fi |
 
 ## Simulator limitations
 
@@ -63,11 +64,88 @@ scripts/rewrite-manifest.sh <LAN-IP>  # physical device
 
 ## Variant data format
 
-Each variant is a ZIP distributed via CDN and installed to `Library/Application Support/Variants/<variantID>/`.
+### Producing variants
+
+Use `scripts/seed.sh` (which handles the venv for you) or invoke the scraper directly:
+
+```bash
+cd scrape
+.venv/bin/python3 scrape.py soulsilver
+# writes output/soulsilver.json  (raw debug data)
+# writes output/soulsilver.zip   (app-ready artifact)
+# updates output/manifest.json   (global variant catalog)
+```
+
+`scrape.py` is the single entry point. It fetches data from PokeAPI and Bulbapedia, then immediately calls `transform.py` to shape and package the result. The two steps always run together — there is no intermediate script to invoke separately. HTTP responses are cached under `scrape/cache/` so re-running is fast.
+
+### `manifest.json` (CDN catalog)
+
+Fetched by the app at launch from `Constants.remoteManifestURL` and cached to `Application Support/Nuzlocker/manifest.json`. On first launch with no network the store shows empty until the fetch succeeds; installed variants work fully offline regardless.
+
+The scraper writes an intermediate `output/manifest.json` with per-variant metadata but no SHA256 or file size — those are only known after uploading to the CDN. A deploy script (not yet written) computes them, groups variants into games, and produces the final CDN manifest.
+
+```json
+{
+  "manifestVersion": 1,
+  "updatedAt": "2026-05-20T00:00:00Z",
+  "games": [
+    {
+      "id":                    "heartgold_soulsilver",
+      "displayName":           "HeartGold / SoulSilver",
+      "generation":            4,
+      "generationDisplayName": "Generation IV",
+      "variants": [
+        {
+          "id":             "soulsilver",
+          "displayName":    "SoulSilver",
+          "zipURL":         "https://cdn.example.com/variants/soulsilver.zip",
+          "zipSHA256":      "abc123…",
+          "sizeBytes":      12345678,
+          "contentVersion": "1.0.0",
+          "layoutVersion":  1
+        }
+      ]
+    }
+  ]
+}
+```
+
+**`Manifest`**
+
+| Field             | Type       | Description                                          |
+| ----------------- | ---------- | ---------------------------------------------------- |
+| `manifestVersion` | integer    | Schema version; increment on breaking changes        |
+| `updatedAt`       | ISO 8601   | Timestamp of last update                             |
+| `games`           | `Game[]`   | All purchasable games, grouped by version-group      |
+
+**`Game`**
+
+| Field                  | Type           | Description                                              |
+| ---------------------- | -------------- | -------------------------------------------------------- |
+| `id`                   | string         | Version-group identifier (e.g. `"heartgold_soulsilver"`) |
+| `displayName`          | string         | Human-readable group title (e.g. `"HeartGold / SoulSilver"`) |
+| `generation`           | integer        | Generation number (1–9)                                  |
+| `generationDisplayName`| string         | Human-readable generation label (e.g. `"Generation IV"`) |
+| `variants`             | `GameVariant[]`| Individual version variants within this group            |
+
+**`GameVariant`**
+
+| Field            | Type    | Description                                                       |
+| ---------------- | ------- | ----------------------------------------------------------------- |
+| `id`             | string  | Variant identifier (e.g. `"soulsilver"`)                          |
+| `displayName`    | string  | Human-readable version title                                      |
+| `zipURL`         | string  | CDN URL for the variant ZIP                                       |
+| `zipSHA256`      | string  | SHA-256 hex digest of the ZIP; verified before install            |
+| `sizeBytes`      | integer | Compressed ZIP size in bytes; shown in the download UI            |
+| `contentVersion` | string  | Semver string; bump when game data changes                        |
+| `layoutVersion`  | integer | ZIP layout schema version; app evicts cached installs on mismatch |
+
+### Variant ZIP
+
+Each variant ZIP is installed to `Library/Application Support/Nuzlocker/Variants/<variantID>/`.
 
 ```
 <variantID>.zip
-├── manifest.json      — identity and layout metadata
 ├── game.json          — routes, gyms, TMs, starters
 ├── pokedex.json       — creature entries for this game's Pokédex
 └── sprites/
@@ -75,155 +153,169 @@ Each variant is a ZIP distributed via CDN and installed to `Library/Application 
     └── …
 ```
 
-### `manifest.json`
-
-```json
-{
-  "variantID":      "red",
-  "gameID":         "red_blue",
-  "generation":     1,
-  "displayName":    "Red",
-  "contentVersion": "1.0.0",
-  "layoutVersion":  1,
-  "spritesPath":    "sprites",
-  "pokedexFile":    "pokedex.json",
-  "gameDataFile":   "game.json"
-}
-```
-
-| Field            | Type    | Description                                                  |
-| ---------------- | ------- | ------------------------------------------------------------ |
-| `variantID`      | string  | Unique identifier for this variant (e.g. `"red"`, `"soulsilver"`) |
-| `gameID`         | string  | Version-group identifier, shared by paired games (e.g. `"red_blue"`) |
-| `generation`     | integer | Generation number (e.g. `1` … `9`)                          |
-| `displayName`    | string  | Human-readable game title                                    |
-| `contentVersion` | string  | Semver string; bump when game data changes                   |
-| `layoutVersion`  | integer | ZIP layout schema version; app evicts installs on mismatch  |
-| `spritesPath`    | string  | Subdirectory containing sprite PNGs                          |
-| `pokedexFile`    | string  | Filename of the Pokédex JSON inside the ZIP                  |
-| `gameDataFile`   | string  | Filename of the game data JSON inside the ZIP                |
-
 ### `game.json`
 
-```json
-{
-  "variantID": "red",
-  "starters": [1, 4, 7],
-  "routes": [
-    {
-      "id": "viridian_forest",
-      "displayName": "Viridian Forest",
-      "areas": [
-        {
-          "id": "viridian_forest_area",
-          "displayName": "",
-          "encounters": [
-            { "method": "walk", "pokedexNumber": 10, "rate": 0.05, "minLevel": 3, "maxLevel": 5 }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "ice_path",
-      "displayName": "Ice Path",
-      "areas": [
-        {
-          "id": "ice_path_1f",
-          "displayName": "1F",
-          "encounters": [
-            { "method": "walk", "pokedexNumber": 220, "rate": 0.1, "minLevel": 18, "maxLevel": 22 }
-          ]
-        },
-        {
-          "id": "ice_path_b1f",
-          "displayName": "B1F",
-          "encounters": [
-            { "method": "walk", "pokedexNumber": 225, "rate": 0.05, "minLevel": 20, "maxLevel": 24 }
-          ]
-        }
-      ]
-    }
-  ],
-  "gyms": [
-    {
-      "id": "gym_1",
-      "leader": "Brock",
-      "badge": "Boulder Badge",
-      "levelCap": 14,
-      "team": [
-        { "pokedexNumber": 74, "level": 12 },
-        { "pokedexNumber": 95, "level": 14 }
-      ]
-    }
-  ],
-  "tms": [
-    { "number": 1, "name": "TM01", "move": "mega-punch", "location": "Celadon Dept. Store" },
-    { "number": 2, "name": "TM02", "move": "razor-wind",  "location": null }
-  ]
-}
-```
+Every location is represented as a `Route` with one or more `Floor` entries. Single-floor routes have exactly one floor with `imageURL: null` and no warps. Multi-floor dungeons have one entry per floor with a Bulbapedia map image and tile-grid warp connections. Encounter sub-areas (grass, surfing, fishing) live inside their specific floor.
 
 **Top-level fields**
 
-| Field       | Type      | Description                                        |
-| ----------- | --------- | -------------------------------------------------- |
-| `variantID` | string    | Matches `manifest.json`                            |
-| `starters`  | `int[]`   | National dex numbers of the game's starter Pokémon |
-| `routes`    | `Route[]` | Ordered list of encounter locations                |
-| `gyms`      | `Gym[]`   | Ordered list of gym leaders                        |
-| `tms`       | `TM[]`    | All TMs available in this game                     |
+| Field               | Type                   | Description                                                         |
+| ------------------- | ---------------------- | ------------------------------------------------------------------- |
+| `variantID`         | string                 | Matches the variant's entry in the global `manifest.json`           |
+| `starters`          | `int[]`                | National dex numbers of the starter Pokémon                         |
+| `hmMoves`           | `{string: string}`     | Move slug → HM identifier (e.g. `"surf": "hm03"`)                  |
+| `badgeObedience`    | `BadgeObedience[]`     | Outsider obedience thresholds, sorted by badge count                |
+| `routes`            | `Route[]`              | Encounter locations in story order                                  |
+| `gyms`              | `Gym[]`                | Gym leaders in badge order                                          |
+| `eliteFour`         | `TrainerData[]`        | Elite Four in order                                                 |
+| `champion`          | `TrainerData` \| null  | Champion; `null` if not yet defined for this game                   |
+| `rivals`            | `TrainerData[]`        | Rival trainers with all battles across the game                     |
+| `tms`               | `TM[]`                 | All TMs available in this game                                      |
+| `moves`             | `{string: MoveData}`   | Move slug → full move data for every move in the learnsets and trainer teams |
+
+**`BadgeObedience`**
+
+| Field      | Type    | Description                                           |
+| ---------- | ------- | ----------------------------------------------------- |
+| `badges`   | integer | Number of badges required                             |
+| `maxLevel` | integer | Maximum level of outsider Pokémon that will obey      |
+
+**`FixedEncounter`**
+
+Shared type for both `staticEncounters` and `giftPokemon`.
+
+| Field         | Type           | Description                                                       |
+| ------------- | -------------- | ----------------------------------------------------------------- |
+| `id`          | integer        | Species ID (national dex number)                                  |
+| `level`       | integer        | Level (1 for eggs)                                                |
+| `alwaysShiny` | boolean        | `true` for scripted shinies (e.g. Red Gyarados)                   |
+| `source`      | string \| null | NPC or event description for gifts (e.g. `"Bill"`); `null` for static encounters |
+| `note`        | string \| null | Any special requirement or context (e.g. `"Requires Poké Flute"`) |
+
+**`InGameTrade`**
+
+| Field          | Type    | Description                        |
+| -------------- | ------- | ---------------------------------- |
+| `giveID`       | integer | Species ID the player gives        |
+| `receiveID`    | integer | Species ID the player receives     |
+| `receiveLevel` | integer | Level of the received creature     |
+| `npc`          | string  | NPC name                           |
 
 **`Route`**
 
-| Field         | Type     | Description                                        |
-| ------------- | -------- | -------------------------------------------------- |
-| `id`          | string   | Snake-case location slug (e.g. `"ice_path"`)       |
-| `displayName` | string   | Human-readable location name                       |
-| `areas`       | `Area[]` | One entry for simple routes; multiple for multi-floor/multi-section locations |
+| Field         | Type      | Description                                                                          |
+| ------------- | --------- | ------------------------------------------------------------------------------------ |
+| `id`          | string    | Kebab-case location slug                                                             |
+| `displayName` | string    | Human-readable location name                                                         |
+| `floors`      | `Floor[]` | One entry per floor; single-floor routes have exactly one entry with `imageURL: null` |
+
+**`Floor`**
+
+| Field         | Type           | Description                                                                       |
+| ------------- | -------------- | --------------------------------------------------------------------------------- |
+| `id`          | string         | Stable kebab-case slug; used as a foreign key in `Warp.destFloorID`               |
+| `displayName` | string         | Floor label (e.g. `"1F"`, `"B1F"`); matches route name for single-floor locations |
+| `imageURL`    | string \| null | Bulbapedia CDN URL for the floor map image; `null` for single-floor routes        |
+| `warps`            | `Warp[]`            | Tile-grid connections to other floors; empty for single-floor routes              |
+| `areas`            | `Area[]`            | Encounter sub-areas on this floor (one per encounter method group)                |
+| `staticEncounters` | `FixedEncounter[]`  | Scripted one-time encounters on this floor (legendaries, Red Gyarados, etc.)      |
+| `giftPokemon`      | `FixedEncounter[]`  | Pokémon received from NPCs on this floor                                          |
+| `inGameTrades`     | `InGameTrade[]`     | NPC trade offers on this floor                                                    |
+
+**`Warp`**
+
+Coordinates are tile-grid units — 1 tile = 16 px in all mainline generations. Matches the format used by the [pret decomp repos](https://github.com/pret). To render an overlay, multiply by 16 to get pixel position, then scale to the displayed image size.
+
+| Field         | Type    | Description                                               |
+| ------------- | ------- | --------------------------------------------------------- |
+| `x`           | integer | Tile column of the warp on this floor's map image         |
+| `y`           | integer | Tile row of the warp on this floor's map image            |
+| `destFloorID` | string  | `id` of the destination floor                             |
+| `destX`       | integer | Tile column of the arrival point on the destination floor |
+| `destY`       | integer | Tile row of the arrival point on the destination floor    |
 
 **`Area`**
 
-| Field         | Type          | Description                                                                 |
-| ------------- | ------------- | --------------------------------------------------------------------------- |
-| `id`          | string        | Snake-case area slug (e.g. `"ice_path_b1f"`)                                |
-| `displayName` | string        | Floor or section label (e.g. `"1F"`, `"B1F"`, `"Violet City Side"`); empty string for simple single-area locations |
-| `encounters`  | `Encounter[]` | Possible wild Pokémon for this area                                         |
+| Field         | Type          | Description                                                                                                       |
+| ------------- | ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `id`          | string        | Kebab-case area slug                                                                                              |
+| `displayName` | string \| null | Encounter method label (e.g. `"Walking"`, `"Surfing"`, `"Old Rod"`); `null` when the floor has only one encounter method |
+| `encounters`  | `Encounter[]` | Possible wild Pokémon                                                                                             |
 
 **`Encounter`**
 
-| Field           | Type    | Description                                              |
-| --------------- | ------- | -------------------------------------------------------- |
-| `method`        | string  | Encounter method (e.g. `"walk"`, `"surf"`, `"fishing"`) |
-| `pokedexNumber` | integer | National dex number                                      |
-| `rate`          | number  | Encounter probability 0–1                                |
-| `minLevel`      | integer | Minimum wild level                                       |
-| `maxLevel`      | integer | Maximum wild level                                       |
+| Field           | Type       | Description                                                                                                              |
+| --------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `method`        | string     | Encounter method: `"walk"`, `"surf"`, `"old-rod"`, `"good-rod"`, `"super-rod"`, `"rock-smash"`, `"gift"`, etc.          |
+| `id`            | integer    | Species ID (national dex number)                                                                                         |
+| `rate`          | number     | Encounter probability 0–100 (percentage)                                                                                 |
+| `minLevel`      | integer    | Minimum wild level                                                                                                       |
+| `maxLevel`      | integer    | Maximum wild level                                                                                                       |
+| `conditions`    | `string[]` | PokeAPI condition slugs that must hold (e.g. `"time-morning"`, `"swarm-yes"`, `"radio-hoenn"`); empty means always active |
 
 **`Gym`**
 
-| Field      | Type         | Description                                       |
-| ---------- | ------------ | ------------------------------------------------- |
-| `id`       | string       | Stable slug (e.g. `"gym_1"`)                      |
-| `leader`   | string       | Gym leader name                                   |
-| `badge`    | string       | Badge awarded on victory                          |
-| `levelCap` | integer      | Level of the leader's highest-level Pokémon       |
-| `team`     | `Member[]`   | Leader's team in final battle                     |
+| Field         | Type           | Description                                                           |
+| ------------- | -------------- | --------------------------------------------------------------------- |
+| `id`          | string         | Leader name slug (e.g. `"falkner"`, `"lt-surge"`)                     |
+| `leader`      | string         | Gym leader name                                                       |
+| `badge`       | string         | Badge awarded on victory                                              |
+| `specialty`   | string \| null | Type specialty slug (e.g. `"flying"`)                                 |
+| `region`      | string \| null | Region slug for multi-region games (e.g. `"johto"`, `"kanto"`); `null` otherwise |
+| `team`        | `Member[]`     | Leader's team in the main battle                                      |
+| `rematchTeam` | `Member[]` \| null | Leader's team in the rematch battle; `null` if none               |
 
-**`Member`** (gym team entry)
+**`Member`**
 
-| Field           | Type    | Description         |
-| --------------- | ------- | ------------------- |
-| `pokedexNumber` | integer | National dex number |
-| `level`         | integer | Pokémon level       |
+| Field           | Type           | Description                                              |
+| --------------- | -------------- | -------------------------------------------------------- |
+| `id`            | integer        | Species ID (national dex number)                         |
+| `level`         | integer        | Level                                                    |
+| `moves`         | `string[]`     | Move slugs (up to 4); may be empty if data is unavailable |
+| `ability`       | string \| null | Ability slug; `null` if not listed                       |
+| `heldItem`      | string \| null | Held item slug; `null` if none                           |
+
+**`TrainerData`** (Elite Four, Champion, and Rivals)
+
+| Field          | Type              | Description                                                       |
+| -------------- | ----------------- | ----------------------------------------------------------------- |
+| `id`           | string            | Trainer name slug (e.g. `"will"`, `"silver"`)                     |
+| `trainerClass` | string            | `"elite_four"`, `"champion"`, or `"rival"`                        |
+| `name`         | string            | Trainer name                                                      |
+| `specialty`    | string \| null    | Type specialty slug                                               |
+| `battles`      | `TrainerBattle[]` | All battles in story order; E4/champion have 1–2, rivals have many |
+
+**`TrainerBattle`**
+
+| Field           | Type           | Description                                                                  |
+| --------------- | -------------- | ---------------------------------------------------------------------------- |
+| `team`          | `Member[]`     | Team in this battle                                                          |
+| `isRematch`     | boolean        | `true` for the post-game rematch battle                                      |
+| `locationHint`  | string \| null | Section heading from Bulbapedia indicating where this battle occurs; non-null for rivals |
+| `playerStarter` | string \| null | Player starter slug that triggers this team variant; `null` if team is fixed |
 
 **`TM`**
 
-| Field      | Type            | Description                                           |
-| ---------- | --------------- | ----------------------------------------------------- |
-| `number`   | integer         | TM number (1–100)                                     |
-| `name`     | string          | Display name (e.g. `"TM01"`)                          |
-| `move`     | string          | PokeAPI move slug (e.g. `"mega-punch"`)               |
-| `location` | string \| null  | Where to obtain the TM; `null` if not yet known       |
+| Field      | Type           | Description                                     |
+| ---------- | -------------- | ----------------------------------------------- |
+| `number`   | integer        | TM number (1–100)                               |
+| `name`     | string         | TM identifier slug (e.g. `"tm01"`, `"tm26"`)    |
+| `move`     | string         | PokeAPI move slug (e.g. `"dynamic-punch"`)      |
+| `location` | string \| null | Where to obtain the TM; `null` if not yet known |
+
+**`MoveData`**
+
+| Field          | Type           | Description                                                        |
+| -------------- | -------------- | ------------------------------------------------------------------ |
+| `type`         | string         | Type slug (e.g. `"fire"`, `"water"`)                              |
+| `power`        | integer \| null | Base power; `null` for status moves                               |
+| `accuracy`     | integer \| null | Accuracy 0–100; `null` for moves that never miss                  |
+| `pp`           | integer        | Base PP                                                            |
+| `damageClass`  | string         | `"physical"`, `"special"`, or `"status"`                          |
+| `priority`     | integer        | Move priority bracket (0 = normal, +1 = Quick Attack, etc.)       |
+| `effectChance` | integer \| null | Percentage chance of secondary effect; `null` if none             |
+| `effect`       | string         | Short mechanical description                                       |
+| `description`  | string         | In-game flavour text                                               |
 
 ### `pokedex.json`
 
@@ -231,11 +323,27 @@ Each variant is a ZIP distributed via CDN and installed to `Library/Application 
 {
   "creatures": [
     {
-      "pokedexNumber": 1,
+      "id": 1,
       "name": "bulbasaur",
       "types": ["grass", "poison"],
       "baseStats": { "hp": 45, "atk": 49, "def": 49, "spe": 45 },
-      "spriteFile": "sprites/001.png"
+      "abilities": [
+        { "name": "overgrow",    "description": "Powers up Grass-type moves in a pinch.", "isHidden": false },
+        { "name": "chlorophyll", "description": "Boosts the Pokémon's Speed stat in sunshine.", "isHidden": true }
+      ],
+      "evolvesTo": [
+        {
+          "id": 2,
+          "methods": [ { "trigger": "level-up", "minLevel": 16 } ]
+        }
+      ],
+      "learnset": [
+        { "move": "tackle",       "method": "level-up", "level": 1,  "machine": null },
+        { "move": "growl",        "method": "level-up", "level": 3,  "machine": null },
+        { "move": "solar-beam",   "method": "machine",  "level": null, "machine": "tm22" },
+        { "move": "cut",          "method": "machine",  "level": null, "machine": "hm01" }
+      ],
+      "spriteFile": "001.png"
     }
   ]
 }
@@ -243,10 +351,49 @@ Each variant is a ZIP distributed via CDN and installed to `Library/Application 
 
 **`Creature`**
 
-| Field           | Type       | Description                                          |
-| --------------- | ---------- | ---------------------------------------------------- |
-| `pokedexNumber` | integer    | National dex number                                  |
-| `name`          | string     | PokeAPI species slug (lowercase)                     |
-| `types`         | `string[]` | One or two type slugs (e.g. `["fire"]`, `["water", "flying"]`) |
-| `baseStats`     | object     | `hp`, `atk`, `def`, `spe` — all integers             |
-| `spriteFile`    | string     | Relative path inside the ZIP (e.g. `"sprites/001.png"`) |
+| Field           | Type                  | Description                                          |
+| --------------- | --------------------- | ---------------------------------------------------- |
+| `id`            | integer               | Species ID (national dex number)                     |
+| `name`          | string                | PokeAPI species slug (lowercase)                     |
+| `types`         | `string[]`            | One or two type slugs (e.g. `["fire"]`, `["water", "flying"]`) |
+| `baseStats`     | object                | `hp`, `atk`, `def`, `spe` — all integers             |
+| `abilities`     | `Ability[]`           | Abilities available to this species in this game     |
+| `evolvesTo`     | `EvolutionTarget[]`   | Direct evolutions from this species                  |
+| `learnset`      | `LearnsetEntry[]`     | Moves available in this game: level-up moves first (in level order), then machine moves |
+| `spriteFile`    | string                | Sprite filename inside the ZIP's `sprites/` folder (e.g. `"001.png"`) |
+
+**`Ability`**
+
+| Field         | Type    | Description                                                        |
+| ------------- | ------- | ------------------------------------------------------------------ |
+| `name`        | string  | PokeAPI ability slug (e.g. `"overgrow"`, `"chlorophyll"`)         |
+| `description` | string  | In-game flavour text for this ability in the relevant game version |
+| `isHidden`    | boolean | `true` for Hidden Abilities (not obtainable in all games)          |
+
+**`EvolutionTarget`**
+
+| Field           | Type              | Description                                  |
+| --------------- | ----------------- | -------------------------------------------- |
+| `id`            | integer           | Species ID of the species this evolves into  |
+| `methods`       | `EvolutionMethod[]` | One or more ways to trigger the evolution  |
+
+**`EvolutionMethod`**
+
+| Field          | Type           | Description                                                      |
+| -------------- | -------------- | ---------------------------------------------------------------- |
+| `trigger`      | string         | PokeAPI trigger slug: `"level-up"`, `"use-item"`, `"trade"`, etc. |
+| `minLevel`     | integer \| null | Minimum level required                                          |
+| `item`         | string \| null | Item slug consumed to evolve (use-item trigger)                 |
+| `heldItem`     | string \| null | Item slug the Pokémon must hold (trade trigger)                 |
+| `knownMove`    | string \| null | Move slug the Pokémon must know                                 |
+| `timeOfDay`    | string \| null | `"day"` or `"night"`                                            |
+| `minHappiness` | integer \| null | Friendship threshold required                                   |
+
+**`LearnsetEntry`**
+
+| Field     | Type           | Description                                             |
+| --------- | -------------- | ------------------------------------------------------- |
+| `move`    | string         | PokeAPI move slug                                       |
+| `method`  | string         | `"level-up"` or `"machine"`                            |
+| `level`   | integer \| null | Level learned at; `null` for machine moves             |
+| `machine` | string \| null | `"hm01"`, `"tm22"`, etc.; `null` for level-up moves   |

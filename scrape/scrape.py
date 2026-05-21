@@ -3,15 +3,38 @@
 Pokémon game data scraper for Nuzlocke Tracker.
 
 Sources:
-  - PokeAPI (pokeapi.co)       : Pokédex, moves, encounters, evolution chains
-  - Bulbapedia (MediaWiki API) : Trainer teams via raw wikitext
+  - PokeAPI (pokeapi.co)       : Pokédex, moves, encounter tables, evolution chains
+  - Bulbapedia (MediaWiki API) : Trainer teams (wikitext), TM locations, floor map images
 
 Usage:
     python scrape.py "soul silver"
     python scrape.py platinum
     python scrape.py "heart gold"
 
-Output: output/<version>.json
+Output: output/<version>.json — top-level keys:
+  game, version_group, generation, scraped_at
+  hm_moves          — {move_name: "hmNN"}
+  badge_obedience   — [{badges, level_cap}]
+  starters          — [{pokemon_id, ...}]
+  static_encounters — [{pokemon_id, level, ...}]
+  gift_pokemon      — [{pokemon_id, ...}]
+  in_game_trades    — [{...}]
+  route_order       — [{id, display_name, prerequisite?, note?}]
+  routes            — {area_name: {location, area, display_name,
+                      encounters: [{method, conditions, pokemon_id, chance, min_level, max_level}]}}
+  dungeon_floors    — {location_id: [{id, display_name, image_url, pokeapi_areas,
+                      warps: [{x, y, dest_floor_id, dest_x, dest_y}]}]}
+                      warp coordinates are tile-grid units (1 tile = 16 px)
+  trainers          — [{class, name, team, ...}]
+  tms               — [{number, name, move, location?}]
+  pokedex           — {pokemon_id: {name, types, stats, moves, abilities, ...}}
+  moves             — {move_name: {type, power, accuracy, effect, ...}}
+  abilities         — {ability_name: {effect, short_effect, description}}
+
+`routes` and `dungeon_floors` are kept separate because PokeAPI encounter areas do not
+map 1-to-1 with dungeon floors. make_variants.py merges them using the `pokeapi_areas`
+list on each floor entry to assign encounters to the correct floor.
+
 Cache:  cache/<sha1>.json  (skip re-fetching on re-runs)
 """
 
@@ -28,7 +51,8 @@ from typing import Optional
 
 import aiohttp
 
-from game_data import HM_MOVES, BADGE_OBEDIENCE, TRAINER_DEFS, GAME_STATIC, ROUTE_ORDER
+from game_data import HM_MOVES, BADGE_OBEDIENCE, TRAINER_DEFS, GAME_STATIC, ROUTE_ORDER, CAVE_MAPS
+from transform import build_and_write_zip
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
@@ -556,6 +580,69 @@ def collect_move_names(pokedex: dict[str, dict]) -> set[str]:
     return names
 
 
+# ── PokeAPI: abilities ─────────────────────────────────────────────────────────
+
+async def _fetch_ability(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    ability_name: str,
+    version_group: str,
+) -> dict | None:
+    data = await _get_json(session, sem, f"{POKEAPI}/ability/{ability_name}")
+    if not data:
+        return None
+
+    effect = ""
+    short_effect = ""
+    for e in data.get("effect_entries", []):
+        if e["language"]["name"] == "en":
+            effect       = e.get("effect", "").replace("\n", " ")
+            short_effect = e.get("short_effect", "")
+            break
+
+    description = ""
+    for ft in reversed(data.get("flavor_text_entries", [])):
+        if ft["language"]["name"] != "en":
+            continue
+        if ft.get("version_group", {}).get("name") == version_group:
+            description = ft["flavor_text"].replace("\n", " ").replace("\f", " ")
+            break
+    if not description:
+        for ft in reversed(data.get("flavor_text_entries", [])):
+            if ft["language"]["name"] == "en":
+                description = ft["flavor_text"].replace("\n", " ").replace("\f", " ")
+                break
+
+    return {
+        "name":         ability_name,
+        "effect":       effect,
+        "short_effect": short_effect,
+        "description":  description or short_effect,
+    }
+
+
+async def scrape_abilities(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    ability_names: set[str],
+    version_group: str,
+) -> dict[str, dict]:
+    print(f"  Fetching {len(ability_names)} ability entries…")
+    results = await asyncio.gather(*[
+        _fetch_ability(session, sem, name, version_group)
+        for name in sorted(ability_names)
+    ])
+    return {e["name"]: e for e in results if e}
+
+
+def collect_ability_names(pokedex: dict[str, dict]) -> set[str]:
+    return {
+        a["name"]
+        for entry in pokedex.values()
+        for a in entry.get("abilities", [])
+    }
+
+
 # ── Bulbapedia wikitext: template parser ───────────────────────────────────────
 
 def _find_template_end(wikitext: str, start: int) -> int:
@@ -939,6 +1026,96 @@ async def scrape_tms(
     return tms
 
 
+# ── Cave / dungeon maps ────────────────────────────────────────────────────────
+
+async def _fetch_bulba_image_urls(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    filenames: list[str],
+) -> dict[str, str]:
+    """
+    Resolve a list of Bulbapedia File: titles to their direct CDN URLs.
+    Uses the MediaWiki imageinfo API, batching up to 50 titles per request.
+    Returns {filename: url} for files that exist; missing files are omitted.
+    """
+    result: dict[str, str] = {}
+    batch_size = 50
+    for i in range(0, len(filenames), batch_size):
+        batch = filenames[i : i + batch_size]
+        titles = "|".join(f"File:{name}" for name in batch)
+        params = {
+            "action":  "query",
+            "titles":  titles,
+            "prop":    "imageinfo",
+            "iiprop":  "url",
+            "format":  "json",
+        }
+        data = await _get_json(session, sem, BULBA_API, params)
+        if not data:
+            continue
+        for page in data.get("query", {}).get("pages", {}).values():
+            # Pages in the shared Bulbapedia media repository are marked "missing"
+            # on the wiki side but still carry imageinfo with a valid CDN URL.
+            # Only skip pages that have no imageinfo at all.
+            infos = page.get("imageinfo", [])
+            if not infos or not infos[0].get("url"):
+                continue
+            title = page.get("title", "")
+            filename = title.removeprefix("File:")
+            result[filename] = infos[0]["url"]
+    return result
+
+
+async def resolve_map_floors(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    version: str,
+) -> dict[str, list[dict]]:
+    """
+    Resolve Bulbapedia floor image URLs for all cave/dungeon locations in `version`.
+
+    Returns {location_id: [floor_dict, ...]} where each floor_dict contains:
+      id            — stable slug (e.g. "ice-path-b1f")
+      display_name  — human-readable label (e.g. "B1F")
+      image_url     — direct Bulbapedia CDN URL, or None if the image wasn't found
+      warps         — list of {x, y, dest_floor_id, dest_x, dest_y} in tile-grid units
+                      (1 tile = 16 px in all mainline gens), matching pret decomp format
+      pokeapi_areas — list of PokeAPI location-area slugs whose encounters belong to this
+                      floor (e.g. ["ice-path-area"]); empty when not yet mapped. Used by
+                      make_variants.py to assign encounters to the correct floor.
+    """
+    locations = CAVE_MAPS.get(version, [])
+    if not locations:
+        print(f"  [info] No cave map definitions for '{version}' — skipping.")
+        return {}
+
+    all_filenames = [
+        floor["bulbapedia_image"]
+        for loc in locations
+        for floor in loc["floors"]
+        if floor.get("bulbapedia_image")
+    ]
+    print(f"  Resolving {len(all_filenames)} floor image URLs from Bulbapedia…")
+    url_map = await _fetch_bulba_image_urls(session, sem, all_filenames)
+    found = sum(1 for f in all_filenames if f in url_map)
+    print(f"  Resolved {found}/{len(all_filenames)} images.")
+
+    result: dict[str, list[dict]] = {}
+    for loc in locations:
+        floors_out: list[dict] = []
+        for floor in loc["floors"]:
+            img_name = floor.get("bulbapedia_image")
+            floors_out.append({
+                "id":            floor["id"],
+                "display_name":  floor["display_name"],
+                "image_url":     url_map.get(img_name) if img_name else None,
+                "warps":         floor.get("warps", []),
+                "pokeapi_areas": floor.get("pokeapi_areas", []),
+            })
+        result[loc["id"]] = floors_out
+    return result
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 async def run(version: str) -> None:
@@ -972,13 +1149,20 @@ async def run(version: str) -> None:
         tms = await scrape_tms(session, sem, version, version_group)
 
         # 5. Moves
-        print("\n[5/6] Moves")
+        print("\n[5/7] Moves")
         move_names = collect_move_names(pokedex) | collect_trainer_moves(trainers)
         move_names.update(hm_moves.keys())
         move_names.update(tm["move"] for tm in tms)
         moves = await scrape_moves(session, sem, move_names, version_group)
 
-        print("\n[6/6] Assembling output…")
+        # 6. Abilities
+        print("\n[6/7] Abilities")
+        ability_names = collect_ability_names(pokedex)
+        abilities = await scrape_abilities(session, sem, ability_names, version_group)
+
+        # 7. Cave / dungeon maps
+        print("\n[7/7] Cave maps (Bulbapedia) + assembling output…")
+        dungeon_floors = await resolve_map_floors(session, sem, version)
 
     output = {
         "game":          version,
@@ -991,23 +1175,32 @@ async def run(version: str) -> None:
         "static_encounters": static.get("static_encounters", []),
         "gift_pokemon":  static.get("gift_pokemon", []),
         "in_game_trades": static.get("in_game_trades", []),
-        "route_order":   ROUTE_ORDER.get(version, []),
-        "routes":        routes,
-        "trainers":      trainers,
-        "tms":           tms,
-        "pokedex":       pokedex,
-        "moves":         moves,
+        "route_order":     ROUTE_ORDER.get(version, []),
+        "routes":          routes,
+        "dungeon_floors":  dungeon_floors,
+        "trainers":        trainers,
+        "tms":             tms,
+        "pokedex":         pokedex,
+        "moves":           moves,
+        "abilities":       abilities,
     }
 
-    out_path = OUTPUT_DIR / f"{version}.json"
-    out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False))
+    raw_path = OUTPUT_DIR / f"{version}.json"
+    raw_path.write_text(json.dumps(output, indent=2, ensure_ascii=False))
 
-    print(f"\nDone → {out_path}")
+    zip_path = build_and_write_zip(version, output, SPRITES_DIR, OUTPUT_DIR)
+
+    total_floors = sum(len(floors) for floors in dungeon_floors.values())
+    print(f"\nDone")
+    print(f"  Raw     → {raw_path}")
+    print(f"  ZIP     → {zip_path}")
     print(f"  Pokémon : {len(pokedex)}")
     print(f"  Routes  : {len(routes)}")
     print(f"  Trainers: {len(trainers)}")
     print(f"  TMs     : {len(tms)}")
+    print(f"  Dungeons: {len(dungeon_floors)} locations, {total_floors} floors")
     print(f"  Moves   : {len(moves)}")
+    print(f"  Abilities: {len(abilities)}")
 
 
 def main() -> None:

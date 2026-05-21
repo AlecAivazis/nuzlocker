@@ -9,6 +9,8 @@ Contains everything that is hand-authored and game-specific:
   ROUTE_ORDER       — location unlock order with prerequisites
   BULBA_ITEM_FIELDS — Bulbapedia {{itemlist}} field names for each version,
                       used to extract TM locations from item pages
+  CAVE_MAPS         — multi-floor dungeon definitions: floor images (Bulbapedia),
+                      warp connections, and PokeAPI area mappings for encounter assignment
 """
 
 from __future__ import annotations
@@ -525,7 +527,10 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(3,  "cherrygrove-city", "Cherrygrove City"),
         _r(4,  "route-30",         "Route 30"),
         _r(5,  "route-31",         "Route 31"),
+        _r(5,  "dark-cave",        "Dark Cave",          note="Entrance from Route 31; eastern exit to Route 45 needs Surf"),
         _r(6,  "violet-city",      "Violet City",        event="gym1_zephyr"),
+        _r(6,  "sprout-tower",     "Sprout Tower",       note="Three floors; Bellsprout/Gastly encounters"),
+        _r(6,  "mr-pokemons-house","Mr. Pokémon's House", note="Togepi egg received here during Elm's errand"),
         _r(7,  "ruins-of-alph",    "Ruins of Alph",      note="Entrance via Route 32; full access needs Rock Smash"),
         _r(8,  "route-32",         "Route 32"),
         _r(9,  "union-cave",       "Union Cave",         note="Lower floors require Surf"),
@@ -542,6 +547,8 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(18, "route-36",         "Route 36",           event="squirtbottle_sudowoodo"),
         _r(19, "route-37",         "Route 37"),
         _r(20, "ecruteak-city",    "Ecruteak City",      event="gym4_fog"),
+        _r(20, "burned-tower",     "Burned Tower",       note="Three floors; Suicune/Raikou/Entei release event"),
+        _r(20, "bell-tower",       "Bell Tower",         note="Ten floors; Ho-Oh at top requires Rainbow Wing"),
         # HM03 Surf given by Kimono Girls in the Ecruteak Dance Theater
         _r(21, "route-38",         "Route 38"),
         _r(22, "route-39",         "Route 39"),
@@ -568,6 +575,7 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         # Radio Tower Rockets must be defeated before the route to Kanto is cleared
         _r(41, "route-27",         "Route 27",           badges=8, hm="surf"),
         _r(42, "route-26",         "Route 26",           badges=8, hm="surf"),
+        _r(42, "victory-road-kanto", "Victory Road",     badges=8, hm="surf"),
         _r(43, "pokemon-league",   "Pokémon League",     badges=8,
            note="Johto E4: Will → Koga → Bruno → Karen → Lance"),
         # ── Kanto (post-game) ──────────────────────────────────────────────
@@ -615,6 +623,8 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(82, "mt-silver",        "Mt. Silver",         badges=16, hm="rock-climb",
            note="Moltres lv50 here; Red (final boss) at the summit"),
         _r(83, "cerulean-cave",    "Cerulean Cave",      badges=16, hm="surf", note="Mewtwo lv70"),
+        _r(83, "embedded-tower",   "Embedded Tower",     badges=16,
+           note="Groudon (HG) / Kyogre (SS) / Rayquaza (both, after catching the other two)"),
     ],
 
     # ── Red / Blue / Yellow ─────────────────────────────────────────────────
@@ -1106,3 +1116,338 @@ ROUTE_ORDER["white-2"]        = ROUTE_ORDER["black-2"]
 ROUTE_ORDER["y"]              = ROUTE_ORDER["x"]
 ROUTE_ORDER["moon"]           = ROUTE_ORDER["sun"]
 ROUTE_ORDER["ultra-moon"]     = ROUTE_ORDER["ultra-sun"]
+
+
+# ── Cave / dungeon maps ────────────────────────────────────────────────────────
+#
+# Multi-floor locations where players benefit from a visual floor map.
+#
+# Floor fields:
+#   id             — stable slug used as a foreign key in warp destinations and
+#                    in make_variants.py output (e.g. "ice-path-b1f")
+#   display_name   — label shown in the UI (e.g. "B1F")
+#   bulbapedia_image — Bulbapedia File: title without the "File:" prefix; the
+#                    scraper resolves this to a direct CDN URL at scrape time
+#   warps          — connections to other floors:
+#                    [{x, y, dest_floor_id, dest_x, dest_y}]
+#                    coordinates are tile-grid units (1 tile = 16 px in all mainline
+#                    gens). This matches the format pret decomp repos use, so warp data
+#                    pulled from pret requires no conversion. Rendering: multiply by 16
+#                    to get pixel position, or divide by image tile dimensions to normalize.
+#   pokeapi_areas  — PokeAPI location-area slugs whose wild encounters belong to
+#                    this floor (e.g. ["ice-path-area"]). Used by make_variants.py
+#                    to assign the correct encounter rows to each floor. Leave empty
+#                    when the mapping is unknown; encounters will be unassigned.
+
+def _floor(
+    fid: str,
+    display: str,
+    image: str,
+    warps: list[dict] | None = None,
+    pokeapi_areas: list[str] | None = None,
+) -> dict:
+    # warps shape: [{x, y, dest_floor_id, dest_x, dest_y}]
+    # coordinates are tile-grid units (1 tile = 16 px); matches pret decomp format
+    return {
+        "id":               fid,
+        "display_name":     display,
+        "bulbapedia_image": image,
+        "warps":            warps or [],
+        "pokeapi_areas":    pokeapi_areas or [],
+    }
+
+def _loc(lid: str, display: str, floors: list) -> dict:
+    return {"id": lid, "display_name": display, "floors": floors}
+
+
+_HGSS_CAVE_MAPS: list[dict] = [
+    _loc("sprout-tower", "Sprout Tower", [
+        _floor("sprout-tower-1f", "1F", "Sprout Tower 1F HGSS.png"),
+        _floor("sprout-tower-2f", "2F", "Sprout Tower 2F HGSS.png"),
+        _floor("sprout-tower-3f", "3F", "Sprout Tower 3F HGSS.png"),
+    ]),
+    _loc("union-cave", "Union Cave", [
+        _floor("union-cave-1f",  "1F",  "Union Cave 1F HGSS.png"),
+        _floor("union-cave-b1f", "B1F", "Union Cave B1F HGSS.png"),
+        _floor("union-cave-b2f", "B2F", "Union Cave B2F HGSS.png"),
+    ]),
+    _loc("slowpoke-well", "Slowpoke Well", [
+        _floor("slowpoke-well-b1f", "B1F", "Slowpoke Well B1F HGSS.png"),
+        _floor("slowpoke-well-b2f", "B2F", "Slowpoke Well B2F HGSS.png"),
+    ]),
+    _loc("ilex-forest", "Ilex Forest", [
+        _floor("ilex-forest", "Forest", "Ilex Forest HGSS.png"),
+    ]),
+    _loc("mt-mortar", "Mt. Mortar", [
+        _floor("mt-mortar-entrance",   "Entrance",   "Mt Mortar Entrance HGSS.png"),
+        _floor("mt-mortar-basement",   "Basement",   "Mt Mortar Basement HGSS.png"),
+        _floor("mt-mortar-upper-cave", "Upper Cave", "Mt Mortar Upper Cave HGSS.png"),
+        _floor("mt-mortar-lower-cave", "Lower Cave", "Mt Mortar Lower Cave HGSS.png"),
+    ]),
+    _loc("burned-tower", "Burned Tower", [
+        _floor("burned-tower-1f",  "1F",  "Burned Tower 1F HGSS.png"),
+        _floor("burned-tower-b1f", "B1F", "Burned Tower B1F HGSS.png"),
+    ]),
+    _loc("bell-tower", "Bell Tower", [
+        _floor("bell-tower-1f",  "1F",  "Bell Tower 1F HGSS.png"),
+        _floor("bell-tower-2f",  "2F",  "Bell Tower 2F HGSS.png"),
+        _floor("bell-tower-3f",  "3F",  "Bell Tower 3F HGSS.png"),
+        _floor("bell-tower-4f",  "4F",  "Bell Tower 4F HGSS.png"),
+        _floor("bell-tower-5f",  "5F",  "Bell Tower 5F HGSS.png"),
+        _floor("bell-tower-6f",  "6F",  "Bell Tower 6F HGSS.png"),
+        _floor("bell-tower-7f",  "7F",  "Bell Tower 7F HGSS.png"),
+        _floor("bell-tower-8f",  "8F",  "Bell Tower 8F HGSS.png"),
+        _floor("bell-tower-9f",  "9F",  "Bell Tower 9F HGSS.png"),
+        _floor("bell-tower-10f", "10F", "Bell Tower 10F HGSS.png"),
+    ]),
+    _loc("dark-cave", "Dark Cave", [
+        _floor("dark-cave-1", "Violet City Side",    "Dark Cave 1 HGSS.png"),
+        _floor("dark-cave-2", "Blackthorn City Side","Dark Cave 2 HGSS.png"),
+    ]),
+    _loc("ice-path", "Ice Path", [
+        _floor("ice-path-1f",  "1F",  "Ice Path 1F HGSS.png"),
+        _floor("ice-path-b1f", "B1F", "Ice Path B1F HGSS.png"),
+        _floor("ice-path-b2f", "B2F", "Ice Path B2F HGSS.png"),
+        _floor("ice-path-b3f", "B3F", "Ice Path B3F HGSS.png"),
+    ]),
+    _loc("dragons-den", "Dragon's Den", [
+        _floor("dragons-den-entrance", "Entrance", "Dragons Den Entrance HGSS.png"),
+        _floor("dragons-den-interior", "Interior", "Dragons Den HGSS.png"),
+    ]),
+    _loc("whirl-islands", "Whirl Islands", [
+        _floor("whirl-islands-1f-nw", "1F (NW Island)", "Whirl Islands 1F NW HGSS.png"),
+        _floor("whirl-islands-1f-ne", "1F (NE Island)", "Whirl Islands 1F NE HGSS.png"),
+        _floor("whirl-islands-1f-sw", "1F (SW Island)", "Whirl Islands 1F SW HGSS.png"),
+        _floor("whirl-islands-1f-se", "1F (SE Island)", "Whirl Islands 1F SE HGSS.png"),
+        _floor("whirl-islands-b1f",   "B1F",            "Whirl Islands B1F HGSS.png"),
+        _floor("whirl-islands-b2f",   "B2F",            "Whirl Islands B2F HGSS.png"),
+        _floor("whirl-islands-b3f",   "B3F",            "Whirl Islands B3F HGSS.png"),
+    ]),
+    _loc("mt-silver", "Mt. Silver", [
+        _floor("mt-silver-exterior", "Exterior", "Mt. Silver Exterior HGSS.png"),
+        _floor("mt-silver-1f",       "1F",       "Mt. Silver 1F HGSS.png"),
+        _floor("mt-silver-2f",       "2F",       "Mt. Silver 2F HGSS.png"),
+        _floor("mt-silver-3f",       "3F",       "Mt. Silver 3F HGSS.png"),
+        _floor("mt-silver-summit",   "Summit",   "Mt. Silver Summit HGSS.png"),
+    ]),
+    # Kanto dungeons
+    _loc("mt-moon", "Mt. Moon", [
+        _floor("mt-moon-1f",    "1F",    "Mt Moon 1F HGSS.png"),
+        _floor("mt-moon-square","Square","Mt Moon Square HGSS.png"),
+    ]),
+    _loc("rock-tunnel", "Rock Tunnel", [
+        _floor("rock-tunnel-1", "1F",  "Rock Tunnel 1 HGSS.png"),
+        _floor("rock-tunnel-2", "B1F", "Rock Tunnel 2 HGSS.png"),
+    ]),
+    _loc("victory-road-kanto", "Victory Road", [
+        _floor("victory-road-kanto-1f", "1F", "Victory Road 1F HGSS.png"),
+        _floor("victory-road-kanto-2f", "2F", "Victory Road 2F HGSS.png"),
+        _floor("victory-road-kanto-3f", "3F", "Victory Road 3F HGSS.png"),
+    ]),
+    _loc("seafoam-islands", "Seafoam Islands", [
+        _floor("seafoam-islands-1f",  "1F",  "Seafoam Islands 1F HGSS.png"),
+        _floor("seafoam-islands-b1f", "B1F", "Seafoam Islands B1F HGSS.png"),
+        _floor("seafoam-islands-b2f", "B2F", "Seafoam Islands B2F HGSS.png"),
+        _floor("seafoam-islands-b3f", "B3F", "Seafoam Islands B3F HGSS.png"),
+        _floor("seafoam-islands-b4f", "B4F", "Seafoam Islands B4F HGSS.png"),
+    ]),
+    _loc("cerulean-cave", "Cerulean Cave", [
+        _floor("cerulean-cave-1f",  "1F",  "Cerulean Cave 1F HGSS.png"),
+        _floor("cerulean-cave-b1f", "B1F", "Cerulean Cave B1F HGSS.png"),
+        _floor("cerulean-cave-2f",  "2F",  "Cerulean Cave 2F HGSS.png"),
+    ]),
+]
+
+_RED_CAVE_MAPS: list[dict] = [
+    _loc("mt-moon", "Mt. Moon", [
+        _floor("mt-moon-1f",  "1F",  "Mt. Moon 1F RBY.png"),
+        _floor("mt-moon-b1f", "B1F", "Mt. Moon B1F RBY.png"),
+        _floor("mt-moon-b2f", "B2F", "Mt. Moon B2F RBY.png"),
+    ]),
+    _loc("rock-tunnel", "Rock Tunnel", [
+        _floor("rock-tunnel-1f",  "1F",  "Rock Tunnel 1F RBY.png"),
+        _floor("rock-tunnel-b1f", "B1F", "Rock Tunnel B1F RBY.png"),
+    ]),
+    _loc("pokemon-tower", "Pokémon Tower", [
+        _floor("pokemon-tower-1f", "1F", "Pokémon Tower 1F RBY.png"),
+        _floor("pokemon-tower-2f", "2F", "Pokémon Tower 2F RBY.png"),
+        _floor("pokemon-tower-3f", "3F", "Pokémon Tower 3F RBY.png"),
+        _floor("pokemon-tower-4f", "4F", "Pokémon Tower 4F RBY.png"),
+        _floor("pokemon-tower-5f", "5F", "Pokémon Tower 5F RBY.png"),
+        _floor("pokemon-tower-6f", "6F", "Pokémon Tower 6F RBY.png"),
+        _floor("pokemon-tower-7f", "7F", "Pokémon Tower 7F RBY.png"),
+    ]),
+    _loc("silph-co", "Silph Co.", [
+        _floor("silph-co-1f",  "1F",  "Silph Co. 1F RBY.png"),
+        _floor("silph-co-2f",  "2F",  "Silph Co. 2F RBY.png"),
+        _floor("silph-co-3f",  "3F",  "Silph Co. 3F RBY.png"),
+        _floor("silph-co-4f",  "4F",  "Silph Co. 4F RBY.png"),
+        _floor("silph-co-5f",  "5F",  "Silph Co. 5F RBY.png"),
+        _floor("silph-co-6f",  "6F",  "Silph Co. 6F RBY.png"),
+        _floor("silph-co-7f",  "7F",  "Silph Co. 7F RBY.png"),
+        _floor("silph-co-8f",  "8F",  "Silph Co. 8F RBY.png"),
+        _floor("silph-co-9f",  "9F",  "Silph Co. 9F RBY.png"),
+        _floor("silph-co-10f", "10F", "Silph Co. 10F RBY.png"),
+        _floor("silph-co-11f", "11F", "Silph Co. 11F RBY.png"),
+    ]),
+    _loc("victory-road", "Victory Road", [
+        _floor("victory-road-1f", "1F", "Victory Road 1F RBY.png"),
+        _floor("victory-road-2f", "2F", "Victory Road 2F RBY.png"),
+        _floor("victory-road-3f", "3F", "Victory Road 3F RBY.png"),
+    ]),
+    _loc("seafoam-islands", "Seafoam Islands", [
+        _floor("seafoam-islands-1f",  "1F",  "Seafoam Islands 1F RBY.png"),
+        _floor("seafoam-islands-b1f", "B1F", "Seafoam Islands B1F RBY.png"),
+        _floor("seafoam-islands-b2f", "B2F", "Seafoam Islands B2F RBY.png"),
+        _floor("seafoam-islands-b3f", "B3F", "Seafoam Islands B3F RBY.png"),
+        _floor("seafoam-islands-b4f", "B4F", "Seafoam Islands B4F RBY.png"),
+    ]),
+    _loc("cerulean-cave", "Cerulean Cave", [
+        _floor("cerulean-cave-1f",  "1F",  "Cerulean Cave 1F RBY.png"),
+        _floor("cerulean-cave-b1f", "B1F", "Cerulean Cave B1F RBY.png"),
+        _floor("cerulean-cave-2f",  "2F",  "Cerulean Cave 2F RBY.png"),
+    ]),
+    _loc("power-plant", "Power Plant", [
+        _floor("power-plant", "Interior", "Power Plant RBY.png"),
+    ]),
+    # FRLG-only locations (not present in RBY)
+    _loc("mt-ember", "Mt. Ember", [
+        _floor("mt-ember-exterior",       "Exterior",         "Mt Ember FRLG.png"),
+        _floor("mt-ember-summit",         "Summit",           "Mt. Ember Summit FRLG.png"),
+        _floor("mt-ember-summit-path-1f", "Summit Path 1F",   "Mt. Ember Summit Path 1F FRLG.png"),
+        _floor("mt-ember-summit-path-2f", "Summit Path 2F",   "Mt. Ember Summit Path 2F FRLG.png"),
+        _floor("mt-ember-summit-path-3f", "Summit Path 3F",   "Mt. Ember Summit Path 3F FRLG.png"),
+        _floor("mt-ember-ruby-path-b1f",  "Ruby Path B1F",    "Ruby Path B1F FRLG.png"),
+        _floor("mt-ember-ruby-path-b3f",  "Ruby Path B3F",    "Ruby Path B3F FRLG.png"),
+        _floor("mt-ember-ruby-path-b4f",  "Ruby Path B4F",    "Ruby Path B4F FRLG.png"),
+        _floor("mt-ember-ruby-path-b5f",  "Ruby Path B5F",    "Ruby Path B5F FRLG.png"),
+    ]),
+]
+
+_EMERALD_CAVE_MAPS: list[dict] = [
+    _loc("granite-cave", "Granite Cave", [
+        _floor("granite-cave-1f",  "1F",  "Granite Cave 1F E.png"),
+        _floor("granite-cave-b1f", "B1F", "Granite Cave B1F E.png"),
+        _floor("granite-cave-b2f", "B2F", "Granite Cave B2F E.png"),
+    ]),
+    _loc("meteor-falls", "Meteor Falls", [
+        _floor("meteor-falls-entrance",  "Entrance",  "Meteor Falls 1F 1R E.png"),
+        _floor("meteor-falls-1f-1r",     "1F, 1R",    "Meteor Falls 1F 1R E.png"),
+        _floor("meteor-falls-b1f-1r",    "B1F, 1R",   "Meteor Falls B1F 1R E.png"),
+        _floor("meteor-falls-b1f-2r",    "B1F, 2R",   "Meteor Falls B1F 2R E.png"),
+    ]),
+    _loc("mt-chimney", "Mt. Chimney", [
+        _floor("mt-chimney", "Summit", "Mt. Chimney E.png"),
+    ]),
+    _loc("jagged-pass", "Jagged Pass", [
+        _floor("jagged-pass", "Exterior", "Jagged Pass E.png"),
+    ]),
+    _loc("fiery-path", "Fiery Path", [
+        _floor("fiery-path", "Interior", "Fiery Path E.png"),
+    ]),
+    _loc("seafloor-cavern", "Seafloor Cavern", [
+        _floor("seafloor-cavern-entrance", "Entrance",  "Seafloor Cavern Entrance E.png"),
+        _floor("seafloor-cavern-room1",    "Room 1",    "Seafloor Cavern Room 1 E.png"),
+        _floor("seafloor-cavern-room2",    "Room 2",    "Seafloor Cavern Room 2 E.png"),
+        _floor("seafloor-cavern-room3",    "Room 3",    "Seafloor Cavern Room 3 E.png"),
+        _floor("seafloor-cavern-room4",    "Room 4",    "Seafloor Cavern Room 4 E.png"),
+        _floor("seafloor-cavern-room5",    "Room 5",    "Seafloor Cavern Room 5 E.png"),
+        _floor("seafloor-cavern-room6",    "Room 6",    "Seafloor Cavern Room 6 E.png"),
+        _floor("seafloor-cavern-room7",    "Room 7",    "Seafloor Cavern Room 7 E.png"),
+        _floor("seafloor-cavern-room8",    "Room 8",    "Seafloor Cavern Room 8 E.png"),
+        _floor("seafloor-cavern-room9",    "Room 9",    "Seafloor Cavern Room 9 E.png"),
+    ]),
+    _loc("cave-of-origin", "Cave of Origin", [
+        _floor("cave-of-origin-1f",  "1F",  "Cave of Origin 1F E.png"),
+        _floor("cave-of-origin-b1f", "B1F", "Cave of Origin B1F E.png"),
+        _floor("cave-of-origin-b2f", "B2F", "Cave of Origin B2F E.png"),
+        _floor("cave-of-origin-b3f", "B3F", "Cave of Origin B3F E.png"),
+        _floor("cave-of-origin-b4f", "B4F", "Cave of Origin B4F E.png"),
+    ]),
+    _loc("shoal-cave", "Shoal Cave", [
+        _floor("shoal-cave-lowtide-entrance",  "Low Tide Entrance",  "Shoal Cave Low Tide Entrance E.png"),
+        _floor("shoal-cave-lowtide-inner",     "Low Tide Inner Room","Shoal Cave Low Tide Inner Room E.png"),
+        _floor("shoal-cave-hightide-entrance", "High Tide Entrance", "Shoal Cave High Tide Entrance E.png"),
+        _floor("shoal-cave-hightide-inner",    "High Tide Inner Room","Shoal Cave High Tide Inner Room E.png"),
+    ]),
+    _loc("sky-pillar", "Sky Pillar", [
+        _floor("sky-pillar-1f", "1F", "Sky Pillar 1F E.png"),
+        _floor("sky-pillar-2f", "2F", "Sky Pillar 2F E.png"),
+        _floor("sky-pillar-3f", "3F", "Sky Pillar 3F E.png"),
+        _floor("sky-pillar-4f", "4F", "Sky Pillar 4F E.png"),
+        _floor("sky-pillar-5f", "5F", "Sky Pillar 5F E.png"),
+        _floor("sky-pillar-roof", "Roof", "Sky Pillar Roof E.png"),
+    ]),
+    _loc("victory-road", "Victory Road", [
+        _floor("victory-road-1f", "1F", "Victory Road 1F E.png"),
+        _floor("victory-road-b1f","B1F","Victory Road B1F E.png"),
+    ]),
+]
+
+_PLATINUM_CAVE_MAPS: list[dict] = [
+    _loc("oreburgh-gate", "Oreburgh Gate", [
+        _floor("oreburgh-gate-1f",  "1F",  "Oreburgh Gate 1F Pt.png"),
+        _floor("oreburgh-gate-b1f", "B1F", "Oreburgh Gate B1F Pt.png"),
+    ]),
+    _loc("oreburgh-mine", "Oreburgh Mine", [
+        _floor("oreburgh-mine-1f",  "1F",  "Oreburgh Mine 1F Pt.png"),
+        _floor("oreburgh-mine-b1f", "B1F", "Oreburgh Mine B1F Pt.png"),
+    ]),
+    _loc("mt-coronet", "Mt. Coronet", [
+        _floor("mt-coronet-1f",      "1F",          "Mt. Coronet 1F Pt.png"),
+        _floor("mt-coronet-2f",      "2F",          "Mt. Coronet 2F Pt.png"),
+        _floor("mt-coronet-3f",      "3F",          "Mt. Coronet 3F Pt.png"),
+        _floor("mt-coronet-4f",      "4F",          "Mt. Coronet 4F Pt.png"),
+        _floor("mt-coronet-5f",      "5F",          "Mt. Coronet 5F Pt.png"),
+        _floor("mt-coronet-6f",      "6F",          "Mt. Coronet 6F Pt.png"),
+        _floor("mt-coronet-exterior","Exterior",     "Mt. Coronet Exterior Pt.png"),
+        _floor("mt-coronet-summit",  "Summit",       "Spear Pillar Pt.png"),
+    ]),
+    _loc("wayward-cave", "Wayward Cave", [
+        _floor("wayward-cave-1f", "1F", "Wayward Cave 1F Pt.png"),
+        _floor("wayward-cave-2f", "2F", "Wayward Cave 2F Pt.png"),
+    ]),
+    _loc("mt-coronet-b1f", "Mt. Coronet (Underground)", [
+        _floor("mt-coronet-b1f", "B1F", "Mt. Coronet B1F Pt.png"),
+    ]),
+    _loc("iron-island", "Iron Island", [
+        _floor("iron-island-1f",  "1F",  "Iron Island 1F Pt.png"),
+        _floor("iron-island-b1f", "B1F", "Iron Island B1F Pt.png"),
+        _floor("iron-island-b2f", "B2F", "Iron Island B2F Pt.png"),
+    ]),
+    _loc("victory-road-sinnoh", "Victory Road", [
+        _floor("victory-road-sinnoh-1f", "1F", "Victory Road 1F Pt.png"),
+        _floor("victory-road-sinnoh-2f", "2F", "Victory Road 2F Pt.png"),
+        _floor("victory-road-sinnoh-3f", "3F", "Victory Road 3F Pt.png"),
+    ]),
+    _loc("snowpoint-temple", "Snowpoint Temple", [
+        _floor("snowpoint-temple-1f",  "1F",  "Snowpoint Temple 1F Pt.png"),
+        _floor("snowpoint-temple-2f",  "2F",  "Snowpoint Temple 2F Pt.png"),
+        _floor("snowpoint-temple-3f",  "3F",  "Snowpoint Temple 3F Pt.png"),
+        _floor("snowpoint-temple-4f",  "4F",  "Snowpoint Temple 4F Pt.png"),
+        _floor("snowpoint-temple-5f",  "5F",  "Snowpoint Temple 5F Pt.png"),
+    ]),
+    _loc("distortion-world", "Distortion World", [
+        _floor("distortion-world", "Interior", "Distortion World Pt.png"),
+    ]),
+]
+
+CAVE_MAPS: dict[str, list[dict]] = {
+    "heartgold": _HGSS_CAVE_MAPS,
+    "red":       _RED_CAVE_MAPS,
+    "emerald":   _EMERALD_CAVE_MAPS,
+    "platinum":  _PLATINUM_CAVE_MAPS,
+}
+# Aliases
+for _a, _b in [
+    ("soulsilver", "heartgold"),
+    ("gold", "heartgold"), ("silver", "heartgold"), ("crystal", "heartgold"),
+    ("blue", "red"), ("yellow", "red"), ("firered", "red"), ("leafgreen", "red"),
+    ("ruby", "emerald"), ("sapphire", "emerald"),
+    ("omega-ruby", "emerald"), ("alpha-sapphire", "emerald"),
+    ("diamond", "platinum"), ("pearl", "platinum"),
+    ("black", "platinum"), ("white", "platinum"),
+    ("black-2", "platinum"), ("white-2", "platinum"),
+    ("x", "platinum"), ("y", "platinum"),
+]:
+    CAVE_MAPS.setdefault(_a, CAVE_MAPS.get(_b, []))

@@ -28,15 +28,17 @@ for arg in "$@"; do
     fi
 done
 
-echo "==> Scraping"
+SCRAPE_PYTHON="$ROOT/scrape/.venv/bin/python3"
+if [[ ! -x "$SCRAPE_PYTHON" ]]; then
+    echo "Scraper venv not found. Run: cd scrape && python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt" >&2
+    exit 1
+fi
+
+echo "==> Scraping and packaging"
 for variant in "${VARIANTS[@]}"; do
     echo "    $variant"
-    (cd "$ROOT/scrape" && python3 scrape.py "$variant")
+    (cd "$ROOT/scrape" && "$SCRAPE_PYTHON" scrape.py "$variant")
 done
-
-echo ""
-echo "==> Packaging"
-python3 "$ROOT/scripts/make_variants.py" "${VARIANTS[@]}"
 
 echo ""
 echo "==> Installing"
