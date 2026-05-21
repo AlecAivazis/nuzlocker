@@ -1,6 +1,6 @@
 import Foundation
 
-struct PokedexContent: Codable {
+struct SpeciesContent: Codable {
     let creatures: [Creature]
 }
 

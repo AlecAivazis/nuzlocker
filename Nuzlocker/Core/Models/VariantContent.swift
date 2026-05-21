@@ -36,7 +36,7 @@ struct FloorMap: Codable, Identifiable {
     let warps: [WarpPoint]
     let areas: [RouteArea]
     let staticEncounters: [FixedEncounter]
-    let giftPokemon: [FixedEncounter]
+    let gifts: [FixedEncounter]
     let inGameTrades: [InGameTrade]
 }
 

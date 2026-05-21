@@ -1,5 +1,5 @@
 """
-Transform raw scraper output → app-ready game.json + pokedex.json + ZIP.
+Transform raw scraper output → app-ready game.json + species.json + ZIP.
 
 Called at the end of each scrape run — never as a standalone script.
 """
@@ -36,8 +36,8 @@ _DISPLAY_NAMES: dict[str, str] = {
 def build_and_write_zip(version: str, raw: dict, sprites_dir: Path, output_dir: Path) -> Path:
     """Build the variant ZIP and update the global manifest. Returns the ZIP path."""
     game    = _build_game(raw)
-    pokedex = _build_pokedex(raw)
-    zip_path = _write_zip(version, game, pokedex, sprites_dir, output_dir)
+    species = _build_species(raw)
+    zip_path = _write_zip(version, game, species, sprites_dir, output_dir)
     _update_manifest(raw, output_dir)
     return zip_path
 
@@ -338,7 +338,7 @@ def _build_floor(
         "warps":            [_transform_warp(w) for w in warps],
         "areas":            _build_areas(floor_id, encounters),
         "staticEncounters": [_transform_static(e) for e in statics],
-        "giftPokemon":      [_transform_gift(g)  for g in gifts],
+        "gifts":            [_transform_gift(g)  for g in gifts],
         "inGameTrades":     [_transform_trade(t) for t in trades],
     }
 
@@ -410,9 +410,9 @@ def _transform_warp(w: dict) -> dict:
     }
 
 
-# ── pokedex.json (PokedexContent) ──────────────────────────────────────────────
+# ── species.json (SpeciesContent) ─────────────────────────────────────────────
 
-def _build_pokedex(raw: dict) -> dict:
+def _build_species(raw: dict) -> dict:
     abilities_db = raw.get("abilities", {})
 
     # Move slug → TM name (e.g. "cut" → "hm01", "earthquake" → "tm26")
@@ -425,12 +425,12 @@ def _build_pokedex(raw: dict) -> dict:
     # Pokemon name → ID (needed to resolve evolution chain targets)
     name_to_id: dict[str, int] = {
         entry["name"]: int(pid)
-        for pid, entry in raw["pokedex"].items()
+        for pid, entry in raw["species"].items()
     }
 
     creatures = [
         _build_creature(entry, abilities_db, move_to_machine, name_to_id)
-        for _, entry in sorted(raw["pokedex"].items(), key=lambda x: int(x[0]))
+        for _, entry in sorted(raw["species"].items(), key=lambda x: int(x[0]))
     ]
     return {"creatures": creatures}
 
@@ -523,14 +523,14 @@ def _transform_evo_method(m: dict) -> dict:
 
 # ── ZIP ────────────────────────────────────────────────────────────────────────
 
-def _write_zip(version: str, game: dict, pokedex: dict, sprites_dir: Path, output_dir: Path) -> Path:
+def _write_zip(version: str, game: dict, species: dict, sprites_dir: Path, output_dir: Path) -> Path:
     out_path = output_dir / f"{version}.zip"
-    pokedex_ids = {c["id"] for c in pokedex.get("creatures", [])}
+    species_ids = {c["id"] for c in species.get("creatures", [])}
 
     with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("game.json",    json.dumps(game,    ensure_ascii=False))
-        zf.writestr("pokedex.json", json.dumps(pokedex, ensure_ascii=False))
-        for pid in sorted(pokedex_ids):
+        zf.writestr("species.json", json.dumps(species, ensure_ascii=False))
+        for pid in sorted(species_ids):
             sprite = sprites_dir / f"{pid}.png"
             if sprite.exists():
                 zf.write(sprite, f"sprites/{pid:03d}.png")

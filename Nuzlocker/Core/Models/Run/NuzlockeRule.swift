@@ -7,8 +7,8 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
 
     // MARK: - Harder
 
-    case singlePokemonCenterUse
-    case noPokemonCenters
+    case singleCenterUse
+    case noCenters
     case levelCaps
     case teamSizeLimit
     case gymLockIn
@@ -18,10 +18,10 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
     case oneItemPerBattle
     case foundItemsOnly
     case noBacktracking
-    case banSpecificPokemon
+    case banSpecies
     case tierBans
     case noStarter
-    case noGiftPokemon
+    case noGifts
     case noSetupMoves
     case levelUpMovesOnly
     case blindRun
@@ -31,13 +31,13 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
     case noSTABMoves
     case stabOnly
     case noSuperEffectiveMoves
-    case singleStagePokemonOnly
+    case singleStageOnly
     case typeBan
     case monolocke
     case noDualTypes
     case dualTypesOnly
     case typeDiversity
-    case noBoxedPokemon
+    case noBoxed
     case sequentialRoster
     case deathlessRun
 
@@ -74,8 +74,8 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
 
     var category: Category {
         switch self {
-        case .singlePokemonCenterUse: return .harder
-        case .noPokemonCenters: return .harder
+        case .singleCenterUse: return .harder
+        case .noCenters: return .harder
         case .levelCaps: return .harder
         case .teamSizeLimit: return .harder
         case .gymLockIn: return .harder
@@ -85,10 +85,10 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .oneItemPerBattle: return .harder
         case .foundItemsOnly: return .harder
         case .noBacktracking: return .harder
-        case .banSpecificPokemon: return .harder
+        case .banSpecies: return .harder
         case .tierBans: return .harder
         case .noStarter: return .harder
-        case .noGiftPokemon: return .harder
+        case .noGifts: return .harder
         case .noSetupMoves: return .harder
         case .levelUpMovesOnly: return .harder
         case .blindRun: return .harder
@@ -98,13 +98,13 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .noSTABMoves: return .harder
         case .stabOnly: return .harder
         case .noSuperEffectiveMoves: return .harder
-        case .singleStagePokemonOnly: return .harder
+        case .singleStageOnly: return .harder
         case .typeBan: return .harder
         case .monolocke: return .harder
         case .noDualTypes: return .harder
         case .dualTypesOnly: return .harder
         case .typeDiversity: return .harder
-        case .noBoxedPokemon: return .harder
+        case .noBoxed: return .harder
         case .sequentialRoster: return .harder
         case .deathlessRun: return .harder
         case .reviveAllowance: return .easier
@@ -131,8 +131,8 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .singlePokemonCenterUse: return "Single Pokémon Center Use"
-        case .noPokemonCenters: return "No Pokémon Centers"
+        case .singleCenterUse: return "Single Pokémon Center Use"
+        case .noCenters: return "No Pokémon Centers"
         case .levelCaps: return "Level Caps"
         case .teamSizeLimit: return "Team Size Limit"
         case .gymLockIn: return "Gym Lock-In"
@@ -142,10 +142,10 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .oneItemPerBattle: return "One Item Per Battle"
         case .foundItemsOnly: return "Found Items Only"
         case .noBacktracking: return "No Backtracking"
-        case .banSpecificPokemon: return "Ban Specific Pokémon"
+        case .banSpecies: return "Ban Specific Pokémon"
         case .tierBans: return "Tier Bans"
         case .noStarter: return "No Starter"
-        case .noGiftPokemon: return "No Gift Pokémon"
+        case .noGifts: return "No Gift Pokémon"
         case .noSetupMoves: return "No Setup Moves"
         case .levelUpMovesOnly: return "Level-Up Moves Only"
         case .blindRun: return "Blind Run"
@@ -155,13 +155,13 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .noSTABMoves: return "No STAB Moves"
         case .stabOnly: return "STAB Only"
         case .noSuperEffectiveMoves: return "No Super-Effective Moves"
-        case .singleStagePokemonOnly: return "Single-Stage Pokémon Only"
+        case .singleStageOnly: return "Single-Stage Pokémon Only"
         case .typeBan: return "Type Ban"
         case .monolocke: return "Monolocke"
         case .noDualTypes: return "No Dual-Types"
         case .dualTypesOnly: return "Dual-Types Only"
         case .typeDiversity: return "Type Diversity"
-        case .noBoxedPokemon: return "No Boxed Pokémon"
+        case .noBoxed: return "No Boxed Pokémon"
         case .sequentialRoster: return "Sequential Roster"
         case .deathlessRun: return "Deathless Run"
         case .reviveAllowance: return "Revive Allowance"
@@ -188,8 +188,8 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .singlePokemonCenterUse: return "Limit yourself to using each Pokémon Center once."
-        case .noPokemonCenters: return "Ban using the Pokémon Center completely!"
+        case .singleCenterUse: return "Limit yourself to using each Pokémon Center once."
+        case .noCenters: return "Ban using the Pokémon Center completely!"
         case .levelCaps: return "Enforce Level Caps (your Pokémon can’t be a higher level than the next Gym Leader’s highest-levelled Pokémon – in every Pokémon game)."
         case .teamSizeLimit: return "Limit your team size to the same number of Pokémon as the next Gym Leader."
         case .gymLockIn: return "Once you enter a Gym, you aren’t allowed to leave it until you defeat the Gym Leader."
@@ -199,10 +199,10 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .oneItemPerBattle: return "If that seems too tough, limit yourself to one healing item per battle."
         case .foundItemsOnly: return "Alternatively, allow the use of healing items but ONLY the ones you pick up off the ground – no purchasing them."
         case .noBacktracking: return "No turning back – once you leave a route, area, or city, you may not return (unless required to)."
-        case .banSpecificPokemon: return "Ban certain powerful Pokémon like Gyarados or Garchomp."
+        case .banSpecies: return "Ban certain powerful Pokémon like Gyarados or Garchomp."
         case .tierBans: return "Ban all Pokémon above a certain “tier” (see our tier list index for some examples)."
         case .noStarter: return "Ban the use of Starter Pokémon (release it after catching your first encounter)."
-        case .noGiftPokemon: return "Ban all “Gift” Pokémon (any Pokémon or Egg given to you by an NPC)."
+        case .noGifts: return "Ban all “Gift” Pokémon (any Pokémon or Egg given to you by an NPC)."
         case .noSetupMoves: return "Ban setup or stat boosting moves like Dragon Dance, Encore, or Substitute."
         case .levelUpMovesOnly: return "Ban TMs – Pokémon are only allowed to use moves they learn by level up."
         case .blindRun: return "Do the run “blind” – ban online references."
@@ -212,13 +212,13 @@ enum NuzlockeRule: String, Codable, CaseIterable, Identifiable {
         case .noSTABMoves: return "Banning STAB moves."
         case .stabOnly: return "Banning non-STAB moves."
         case .noSuperEffectiveMoves: return "Banning the use of super-effective moves."
-        case .singleStagePokemonOnly: return "Use only single-stage and/or not-fully-evolved Pokémon."
+        case .singleStageOnly: return "Use only single-stage and/or not-fully-evolved Pokémon."
         case .typeBan: return "Banning Pokémon of a certain type."
         case .monolocke: return "Use ONLY Pokémon of a certain type (a Monolocke )."
         case .noDualTypes: return "Ban dual-type Pokémon."
         case .dualTypesOnly: return "Use ONLY dual-type Pokémon."
         case .typeDiversity: return "Don’t allow any of your party Pokémon to share a type (only one Water-type, one Fairy-type, and so on- and secondary types count!)."
-        case .noBoxedPokemon: return "Any Pokémon that leaves your party (gets placed in the box) can no longer be used."
+        case .noBoxed: return "Any Pokémon that leaves your party (gets placed in the box) can no longer be used."
         case .sequentialRoster: return "You must use encounters in the order they are caught – when a party member faints, the next Pokémon in line replaces them."
         case .deathlessRun: return "Restart if ANY Pokémon faints (a Deathless run)."
         case .reviveAllowance: return "Allow yourself ONE revive (or however many you decide) to bring back a fainted Pokémon."

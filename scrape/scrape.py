@@ -27,12 +27,12 @@ Output: output/<version>.json — top-level keys:
                       warp coordinates are tile-grid units (1 tile = 16 px)
   trainers          — [{class, name, team, ...}]
   tms               — [{number, name, move, location?}]
-  pokedex           — {pokemon_id: {name, types, stats, moves, abilities, ...}}
+  species           — {pokemon_id: {name, types, stats, moves, abilities, ...}}
   moves             — {move_name: {type, power, accuracy, effect, ...}}
   abilities         — {ability_name: {effect, short_effect, description}}
 
 `routes` and `dungeon_floors` are kept separate because PokeAPI encounter areas do not
-map 1-to-1 with dungeon floors. make_variants.py merges them using the `pokeapi_areas`
+map 1-to-1 with dungeon floors. transform.py merges them using the `pokeapi_areas`
 list on each floor entry to assign encounters to the correct floor.
 
 Cache:  cache/<sha1>.json  (skip re-fetching on re-runs)
@@ -411,7 +411,7 @@ async def _fetch_pokemon(
     }
 
 
-async def scrape_pokedex(
+async def scrape_species(
     session: aiohttp.ClientSession,
     sem: asyncio.Semaphore,
     pokemon_ids: set[int],
@@ -570,9 +570,9 @@ async def scrape_moves(
     return {e["name"]: e for e in results if e}
 
 
-def collect_move_names(pokedex: dict[str, dict]) -> set[str]:
+def collect_move_names(species: dict[str, dict]) -> set[str]:
     names: set[str] = set()
-    for entry in pokedex.values():
+    for entry in species.values():
         for lm in entry.get("moves_by_level", []):
             names.add(lm["move"])
         for mm in entry.get("moves_by_machine", []):
@@ -635,10 +635,10 @@ async def scrape_abilities(
     return {e["name"]: e for e in results if e}
 
 
-def collect_ability_names(pokedex: dict[str, dict]) -> set[str]:
+def collect_ability_names(species: dict[str, dict]) -> set[str]:
     return {
         a["name"]
-        for entry in pokedex.values()
+        for entry in species.values()
         for a in entry.get("abilities", [])
     }
 
@@ -1139,10 +1139,10 @@ async def run(version: str) -> None:
         print("\n[2/6] Trainer teams (Bulbapedia)")
         trainers = await scrape_trainers(session, sem, version)
 
-        # 3. Pokédex
-        print("\n[3/6] Pokédex")
+        # 3. Species
+        print("\n[3/6] Species")
         pokemon_ids = collect_pokemon_ids(routes) | collect_extra_ids(static, trainers)
-        pokedex = await scrape_pokedex(session, sem, pokemon_ids, version_group, hm_moves)
+        species = await scrape_species(session, sem, pokemon_ids, version_group, hm_moves)
 
         # 4. TMs
         print("\n[4/6] TMs (PokeAPI + Bulbapedia)")
@@ -1150,14 +1150,14 @@ async def run(version: str) -> None:
 
         # 5. Moves
         print("\n[5/7] Moves")
-        move_names = collect_move_names(pokedex) | collect_trainer_moves(trainers)
+        move_names = collect_move_names(species) | collect_trainer_moves(trainers)
         move_names.update(hm_moves.keys())
         move_names.update(tm["move"] for tm in tms)
         moves = await scrape_moves(session, sem, move_names, version_group)
 
         # 6. Abilities
         print("\n[6/7] Abilities")
-        ability_names = collect_ability_names(pokedex)
+        ability_names = collect_ability_names(species)
         abilities = await scrape_abilities(session, sem, ability_names, version_group)
 
         # 7. Cave / dungeon maps
@@ -1180,7 +1180,7 @@ async def run(version: str) -> None:
         "dungeon_floors":  dungeon_floors,
         "trainers":        trainers,
         "tms":             tms,
-        "pokedex":         pokedex,
+        "species":         species,
         "moves":           moves,
         "abilities":       abilities,
     }
@@ -1194,7 +1194,7 @@ async def run(version: str) -> None:
     print(f"\nDone")
     print(f"  Raw     → {raw_path}")
     print(f"  ZIP     → {zip_path}")
-    print(f"  Pokémon : {len(pokedex)}")
+    print(f"  Pokémon : {len(species)}")
     print(f"  Routes  : {len(routes)}")
     print(f"  Trainers: {len(trainers)}")
     print(f"  TMs     : {len(tms)}")

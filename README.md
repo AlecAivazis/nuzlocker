@@ -147,7 +147,7 @@ Each variant ZIP is installed to `Library/Application Support/Nuzlocker/Variants
 ```
 <variantID>.zip
 ├── game.json          — routes, gyms, TMs, starters
-├── pokedex.json       — creature entries for this game's Pokédex
+├── species.json       — creature entries for every species in this game
 └── sprites/
     ├── 001.png        — national dex number, zero-padded to 3 digits
     └── …
@@ -182,7 +182,7 @@ Every location is represented as a `Route` with one or more `Floor` entries. Sin
 
 **`FixedEncounter`**
 
-Shared type for both `staticEncounters` and `giftPokemon`.
+Shared type for both `staticEncounters` and `gifts`.
 
 | Field         | Type           | Description                                                       |
 | ------------- | -------------- | ----------------------------------------------------------------- |
@@ -219,7 +219,7 @@ Shared type for both `staticEncounters` and `giftPokemon`.
 | `warps`            | `Warp[]`            | Tile-grid connections to other floors; empty for single-floor routes              |
 | `areas`            | `Area[]`            | Encounter sub-areas on this floor (one per encounter method group)                |
 | `staticEncounters` | `FixedEncounter[]`  | Scripted one-time encounters on this floor (legendaries, Red Gyarados, etc.)      |
-| `giftPokemon`      | `FixedEncounter[]`  | Pokémon received from NPCs on this floor                                          |
+| `gifts`            | `FixedEncounter[]`  | Creatures received from NPCs on this floor                                        |
 | `inGameTrades`     | `InGameTrade[]`     | NPC trade offers on this floor                                                    |
 
 **`Warp`**
@@ -317,7 +317,7 @@ Coordinates are tile-grid units — 1 tile = 16 px in all mainline generations. 
 | `effect`       | string         | Short mechanical description                                       |
 | `description`  | string         | In-game flavour text                                               |
 
-### `pokedex.json`
+### `species.json`
 
 ```json
 {

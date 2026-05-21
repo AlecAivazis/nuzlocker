@@ -139,10 +139,10 @@ final class GameLibrary {
         return gd
     }
 
-    func pokedexContent(for variantID: String) -> PokedexContent? {
-        let url = StorageLocations.variantDir(variantID).appendingPathComponent("pokedex.json")
+    func speciesContent(for variantID: String) -> SpeciesContent? {
+        let url = StorageLocations.variantDir(variantID).appendingPathComponent("species.json")
         guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(PokedexContent.self, from: data)
+        return try? JSONDecoder().decode(SpeciesContent.self, from: data)
     }
 
     func routeDisplayName(for routeID: String, variantID: String) -> String {
