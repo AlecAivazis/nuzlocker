@@ -26,6 +26,10 @@ DerivedData/
 scrape/output/
 scrape/cache/
 scrape/.venv/
+*.zip
+
+# Generated at publish time by CI — not hand-edited
+Nuzlocker/bundled-manifest.json
 
 # Python
 **/__pycache__/

@@ -13,7 +13,7 @@ final class Run {
     var status: RunStatus = RunStatus.active
     var notes: String = ""
     var ruleSetData: Data = Data()
-    var customRules: [String] = []
+    var customRules: [String] = []    // freeform user-defined rules beyond NuzlockeRule presets
     var currentBadgeCount: Int = 0
     var levelCapOverride: Int = 0
 

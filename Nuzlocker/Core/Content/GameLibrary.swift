@@ -17,6 +17,7 @@ final class GameLibrary {
     private var purchasedGameIDs: Set<String> = []
     private var freePickGameIDs: Set<String> = []
     private var gameDataCache: [String: VariantContent] = [:]
+    private var speciesCache: [String: SpeciesContent] = [:]
     private let kvs = NSUbiquitousKeyValueStore.default
     private let downloader = Downloader()
 
@@ -125,6 +126,7 @@ final class GameLibrary {
         await MainActor.run {
             installedVariantIDs.remove(variantID)
             gameDataCache.removeValue(forKey: variantID)
+            speciesCache.removeValue(forKey: variantID)
         }
     }
 
@@ -140,9 +142,12 @@ final class GameLibrary {
     }
 
     func speciesContent(for variantID: String) -> SpeciesContent? {
+        if let cached = speciesCache[variantID] { return cached }
         let url = StorageLocations.variantDir(variantID).appendingPathComponent("species.json")
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(SpeciesContent.self, from: data)
+        guard let data = try? Data(contentsOf: url),
+              let sc = try? JSONDecoder().decode(SpeciesContent.self, from: data) else { return nil }
+        speciesCache[variantID] = sc
+        return sc
     }
 
     func routeDisplayName(for routeID: String, variantID: String) -> String {
@@ -179,11 +184,16 @@ final class GameLibrary {
     }()
 
     private func loadCatalog() {
-        guard let data = try? Data(contentsOf: StorageLocations.manifestCache),
-              let manifest = try? Self.decoder.decode(Manifest.self, from: data) else {
-            return  // No cache yet — games stays empty until refreshCatalog() succeeds
+        if let data = try? Data(contentsOf: StorageLocations.manifestCache),
+           let manifest = try? Self.decoder.decode(Manifest.self, from: data) {
+            games = manifest.games
+            return
         }
-        games = manifest.games
+        if let url = Bundle.main.url(forResource: "bundled-manifest", withExtension: "json"),
+           let data = try? Data(contentsOf: url),
+           let manifest = try? Self.decoder.decode(Manifest.self, from: data) {
+            games = manifest.games
+        }
     }
 
     // MARK: - Private — Entitlements

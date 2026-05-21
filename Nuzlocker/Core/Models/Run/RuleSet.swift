@@ -5,20 +5,18 @@ struct RuleSet: Codable, Equatable {
     var firstEncounterOnly: Bool
     var deathIsPermanent: Bool
     var nicknameAll: Bool
-    var dupesClause: Bool
-    var shinyClause: Bool
     var speciesClause: Bool
     var levelCapMode: LevelCapMode
+    var optionalRules: Set<NuzlockeRule>
 
     static let standard = RuleSet(
         preset: .standard,
         firstEncounterOnly: true,
         deathIsPermanent: true,
         nicknameAll: true,
-        dupesClause: true,
-        shinyClause: false,
         speciesClause: false,
-        levelCapMode: .gymBased
+        levelCapMode: .gymBased,
+        optionalRules: [.dupesClause]
     )
 
     static let hardcore = RuleSet(
@@ -26,10 +24,9 @@ struct RuleSet: Codable, Equatable {
         firstEncounterOnly: true,
         deathIsPermanent: true,
         nicknameAll: true,
-        dupesClause: false,
-        shinyClause: false,
         speciesClause: false,
-        levelCapMode: .gymBased
+        levelCapMode: .gymBased,
+        optionalRules: [.dupesClause, .setBattleMode, .levelCaps]
     )
 }
 
