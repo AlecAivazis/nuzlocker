@@ -176,12 +176,6 @@ final class GameLibrary {
         if let data = try? Data(contentsOf: StorageLocations.manifestCache),
            let manifest = try? Self.decoder.decode(Manifest.self, from: data) {
             games = manifest.games
-            return
-        }
-        if let url = Bundle.main.url(forResource: "bundled-manifest", withExtension: "json"),
-           let data = try? Data(contentsOf: url),
-           let manifest = try? Self.decoder.decode(Manifest.self, from: data) {
-            games = manifest.games
         }
     }
 

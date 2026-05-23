@@ -11,25 +11,7 @@ Usage:
     python scrape.py platinum
     python scrape.py "heart gold"
 
-Output: output/<version>.json — top-level keys:
-  game, version_group, generation, scraped_at
-  hm_moves          — {move_name: "hmNN"}
-  badge_obedience   — [{badges, level_cap}]
-  starters          — [{pokemon_id, ...}]
-  static_encounters — [{pokemon_id, level, ...}]
-  gift_pokemon      — [{pokemon_id, ...}]
-  in_game_trades    — [{...}]
-  route_order       — [{id, display_name, prerequisite?, note?}]
-  routes            — {area_name: {location, area, display_name,
-                      encounters: [{method, conditions, pokemon_id, chance, min_level, max_level}]}}
-  dungeon_floors    — {location_id: [{id, display_name, image_url, pokeapi_areas,
-                      warps: [{x, y, dest_floor_id, dest_x, dest_y}]}]}
-                      warp coordinates are tile-grid units (1 tile = 16 px)
-  trainers          — [{class, name, team, ...}]
-  tms               — [{number, name, move, location?}]
-  species           — {pokemon_id: {name, types, stats, moves, abilities, ...}}
-  moves             — {move_name: {type, power, accuracy, effect, ...}}
-  abilities         — {ability_name: {effect, short_effect, description}}
+Output: output/<version>.zip — app-ready artifact (see scrape/FORMAT.md for schema)
 
 `routes` and `dungeon_floors` are kept separate because PokeAPI encounter areas do not
 map 1-to-1 with dungeon floors. transform.py merges them using the `pokeapi_areas`
@@ -51,7 +33,9 @@ from typing import Optional
 
 import aiohttp
 
-from game_data import HM_MOVES, BADGE_OBEDIENCE, TRAINER_DEFS, GAME_STATIC, ROUTE_ORDER, CAVE_MAPS
+from game_data import HM_MOVES, BADGE_OBEDIENCE, TRAINER_DEFS, GAME_STATIC, ROUTE_ORDER, CAVE_MAPS, TRAINER_ROUTES
+from pret_scraper import scrape_pret_warps
+from bulba_trades import scrape_ingame_trades
 from transform import build_and_write_zip
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -59,10 +43,12 @@ from transform import build_and_write_zip
 ROOT        = Path(__file__).parent
 CACHE_DIR   = ROOT / "cache"
 OUTPUT_DIR  = ROOT / "output"
-SPRITES_DIR = OUTPUT_DIR / "sprites"
+SPRITES_DIR = CACHE_DIR / "sprites"
+MAPS_DIR    = CACHE_DIR / "maps"
 CACHE_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 SPRITES_DIR.mkdir(exist_ok=True)
+MAPS_DIR.mkdir(exist_ok=True)
 
 POKEAPI    = "https://pokeapi.co/api/v2"
 BULBA_API  = "https://bulbapedia.bulbagarden.net/w/api.php"
@@ -886,13 +872,14 @@ async def scrape_trainers(
 def collect_extra_ids(
     static: dict,
     trainers: list[dict],
+    trades: list[dict] | None = None,
 ) -> set[int]:
     ids: set[int] = set()
     for key in ("static_encounters", "gift_pokemon", "starters"):
         for e in static.get(key, []):
             if e.get("pokemon_id"):
                 ids.add(e["pokemon_id"])
-    for t in static.get("in_game_trades", []):
+    for t in (trades if trades is not None else static.get("in_game_trades", [])):
         if t.get("give_pokemon_id"):
             ids.add(t["give_pokemon_id"])
         if t.get("receive_pokemon_id"):
@@ -1066,6 +1053,139 @@ async def _fetch_bulba_image_urls(
     return result
 
 
+# (suffixes to try in order, region prefixes to try)
+_ROUTE_IMAGE_CONFIG: dict[str, tuple[list[str], list[str]]] = {
+    "red":            (["RBY"],         ["Kanto"]),
+    "blue":           (["RBY"],         ["Kanto"]),
+    "yellow":         (["RBY"],         ["Kanto"]),
+    "gold":           (["GSC"],         ["Johto", "Kanto"]),
+    "silver":         (["GSC"],         ["Johto", "Kanto"]),
+    "crystal":        (["GSC"],         ["Johto", "Kanto"]),
+    "ruby":           (["RS"],          ["Hoenn"]),
+    "sapphire":       (["RS"],          ["Hoenn"]),
+    "emerald":        (["E"],           ["Hoenn"]),
+    "firered":        (["FRLG"],        ["Kanto"]),
+    "leafgreen":      (["FRLG"],        ["Kanto"]),
+    "diamond":        (["DP"],          ["Sinnoh"]),
+    "pearl":          (["DP"],          ["Sinnoh"]),
+    "platinum":       (["Pt"],          ["Sinnoh"]),
+    "heartgold":      (["HGSS"],        ["Johto", "Kanto"]),
+    "soulsilver":     (["HGSS"],        ["Johto", "Kanto"]),
+    "black":          (["Map", "BW"],   ["Unova"]),
+    "white":          (["Map", "BW"],   ["Unova"]),
+    "black-2":        (["Map", "B2W2"], ["Unova"]),
+    "white-2":        (["Map", "B2W2"], ["Unova"]),
+    "x":              (["XY"],          ["Kalos"]),
+    "y":              (["XY"],          ["Kalos"]),
+    "omega-ruby":     (["ORAS"],        ["Hoenn"]),
+    "alpha-sapphire": (["ORAS"],        ["Hoenn"]),
+    "sun":            (["SM"],          ["Alola"]),
+    "moon":           (["SM"],          ["Alola"]),
+    "ultra-sun":      (["USUM", "SM"],  ["Alola"]),
+    "ultra-moon":     (["USUM", "SM"],  ["Alola"]),
+    "sword":          (["SwSh"],        ["Galar"]),
+    "shield":         (["SwSh"],        ["Galar"]),
+}
+
+
+def _route_image_candidates(display_name: str, suffixes: list[str], regions: list[str]) -> list[str]:
+    import re
+    names = [display_name]
+    stripped = re.sub(r"\s*\([^)]+\)$", "", display_name).strip()
+    if stripped != display_name:
+        names.append(stripped)
+    candidates = []
+    for name in names:
+        for suffix in suffixes:
+            for region in regions:
+                candidates.append(f"{region} {name} {suffix}.png")
+            candidates.append(f"{name} {suffix}.png")
+        if "Map" not in suffixes:
+            for region in regions:
+                candidates.append(f"{region} {name} Map.png")
+            candidates.append(f"{name} Map.png")
+    return candidates
+
+
+async def resolve_route_images(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    version: str,
+    route_order: list[dict],
+    dungeon_floors: dict,
+) -> dict[str, str | None]:
+    """Resolve Bulbapedia map image URLs for outdoor (non-dungeon) routes."""
+    config = _ROUTE_IMAGE_CONFIG.get(version)
+    if not config:
+        return {}
+
+    suffixes, regions = config
+    outdoor_routes = [r for r in route_order if r["location"] not in dungeon_floors]
+
+    route_candidates: dict[str, list[str]] = {
+        r["location"]: _route_image_candidates(r["display_name"], suffixes, regions)
+        for r in outdoor_routes
+    }
+    all_filenames = list({f for cands in route_candidates.values() for f in cands})
+
+    print(f"  Resolving {len(outdoor_routes)} outdoor route images from Bulbapedia…")
+    url_map = await _fetch_bulba_image_urls(session, sem, all_filenames)
+
+    result: dict[str, str | None] = {}
+    for route_id, candidates in route_candidates.items():
+        result[route_id] = next((url_map[c] for c in candidates if c in url_map), None)
+
+    found = sum(1 for v in result.values() if v)
+    print(f"  Found {found}/{len(outdoor_routes)} outdoor route images.")
+    return result
+
+
+async def _download_url(session: aiohttp.ClientSession, sem: asyncio.Semaphore, url: str, dest: Path) -> bool:
+    if dest.exists():
+        return True
+    try:
+        async with sem, session.get(url) as r:
+            if r.status == 200:
+                dest.write_bytes(await r.read())
+                return True
+    except Exception:
+        pass
+    return False
+
+
+async def download_map_images(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    dungeon_floors: dict[str, list[dict]],
+    route_images: dict[str, str | None],
+    maps_dir: Path,
+) -> dict[str, str]:
+    """
+    Download all floor map images and return {floor_id: filename}.
+    Skips files already on disk. Shared across versions (maps_dir is global).
+    """
+    tasks: list[tuple[str, str, Path]] = []  # (floor_id, url, dest)
+
+    for loc_floors in dungeon_floors.values():
+        for floor in loc_floors:
+            url = floor.get("image_url")
+            if url:
+                filename = f"{floor['id']}.png"
+                tasks.append((floor["id"], url, maps_dir / filename))
+
+    for loc_id, url in route_images.items():
+        if url:
+            filename = f"{loc_id}.png"
+            tasks.append((loc_id, url, maps_dir / filename))
+
+    if tasks:
+        results = await asyncio.gather(*[_download_url(session, sem, url, dest) for _, url, dest in tasks])
+        downloaded = sum(results)
+        print(f"  Maps    → {downloaded}/{len(tasks)} downloaded ({sum(1 for _,_,d in tasks if d.exists())} cached)")
+
+    return {floor_id: f"{floor_id}.png" for floor_id, _, dest in tasks if dest.exists()}
+
+
 async def resolve_map_floors(
     session: aiohttp.ClientSession,
     sem: asyncio.Semaphore,
@@ -1132,37 +1252,53 @@ async def run(version: str) -> None:
     async with aiohttp.ClientSession(headers=headers) as session:
 
         # 1. Encounter tables
-        print("\n[1/6] Encounter tables")
+        print("\n[1/7] Encounter tables")
         routes = await scrape_encounters(session, sem, version)
 
         # 2. Trainer teams
-        print("\n[2/6] Trainer teams (Bulbapedia)")
+        print("\n[2/7] Trainer teams (Bulbapedia)")
         trainers = await scrape_trainers(session, sem, version)
 
-        # 3. Species
-        print("\n[3/6] Species")
-        pokemon_ids = collect_pokemon_ids(routes) | collect_extra_ids(static, trainers)
+        # 3. In-game trades
+        print("\n[3/7] In-game trades (Bulbapedia)")
+        static_trades = static.get("in_game_trades", [])
+        if static_trades:
+            trades = static_trades
+            print(f"  Using {len(trades)} hand-authored trades from GAME_STATIC.")
+        else:
+            trades = await scrape_ingame_trades(session, sem, version, CACHE_DIR)
+
+        # 4. Species
+        print("\n[4/7] Species")
+        pokemon_ids = collect_pokemon_ids(routes) | collect_extra_ids(static, trainers, trades)
         species = await scrape_species(session, sem, pokemon_ids, version_group, hm_moves)
 
-        # 4. TMs
-        print("\n[4/6] TMs (PokeAPI + Bulbapedia)")
+        # 5. TMs
+        print("\n[5/7] TMs (PokeAPI + Bulbapedia)")
         tms = await scrape_tms(session, sem, version, version_group)
 
-        # 5. Moves
-        print("\n[5/7] Moves")
+        # 6. Moves
+        print("\n[6/7] Moves")
         move_names = collect_move_names(species) | collect_trainer_moves(trainers)
         move_names.update(hm_moves.keys())
         move_names.update(tm["move"] for tm in tms)
         moves = await scrape_moves(session, sem, move_names, version_group)
 
-        # 6. Abilities
-        print("\n[6/7] Abilities")
+        # 7. Abilities
+        print("\n[7/7] Abilities")
         ability_names = collect_ability_names(species)
         abilities = await scrape_abilities(session, sem, ability_names, version_group)
 
-        # 7. Cave / dungeon maps
-        print("\n[7/7] Cave maps (Bulbapedia) + assembling output…")
-        dungeon_floors = await resolve_map_floors(session, sem, version)
+        # 8. Cave / dungeon maps + pret warp data + outdoor route images
+        print("\n[8/8] Maps (Bulbapedia) + pret warps + assembling output…")
+        dungeon_floors  = await resolve_map_floors(session, sem, version)
+        pret_warps      = await scrape_pret_warps(session, sem, version, CAVE_MAPS.get(version, []), CACHE_DIR)
+        for loc_floors in dungeon_floors.values():
+            for floor in loc_floors:
+                if floor["id"] in pret_warps:
+                    floor["warps"] = pret_warps[floor["id"]]
+        route_images    = await resolve_route_images(session, sem, version, ROUTE_ORDER.get(version, []), dungeon_floors)
+        map_files       = await download_map_images(session, sem, dungeon_floors, route_images, MAPS_DIR)
 
     output = {
         "game":          version,
@@ -1174,10 +1310,12 @@ async def run(version: str) -> None:
         "starters":      static.get("starters", []),
         "static_encounters": static.get("static_encounters", []),
         "gift_pokemon":  static.get("gift_pokemon", []),
-        "in_game_trades": static.get("in_game_trades", []),
+        "in_game_trades": trades,
         "route_order":     ROUTE_ORDER.get(version, []),
         "routes":          routes,
         "dungeon_floors":  dungeon_floors,
+        "route_images":    route_images,
+        "map_files":       map_files,
         "trainers":        trainers,
         "tms":             tms,
         "species":         species,
@@ -1185,14 +1323,10 @@ async def run(version: str) -> None:
         "abilities":       abilities,
     }
 
-    raw_path = OUTPUT_DIR / f"{version}.json"
-    raw_path.write_text(json.dumps(output, indent=2, ensure_ascii=False))
-
-    zip_path = build_and_write_zip(version, output, SPRITES_DIR, OUTPUT_DIR)
+    zip_path = build_and_write_zip(version, output, SPRITES_DIR, MAPS_DIR, OUTPUT_DIR, TRAINER_ROUTES.get(version, {}))
 
     total_floors = sum(len(floors) for floors in dungeon_floors.values())
     print(f"\nDone")
-    print(f"  Raw     → {raw_path}")
     print(f"  ZIP     → {zip_path}")
     print(f"  Pokémon : {len(species)}")
     print(f"  Routes  : {len(routes)}")

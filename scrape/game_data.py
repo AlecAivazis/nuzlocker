@@ -177,6 +177,9 @@ _JOHTO_E4 = [
          "chikorita":"totodile","bayleef":"totodile","meganium":"totodile",
      }},
 ]
+_JOHTO_POSTGAME = [
+    {"name": "Red", "class": "boss", "specialty": "mixed", "page": "Red (game)"},
+]
 _KANTO_GYMS_HGSS = [
     {"name":"Brock",     "class":"gym_leader","specialty":"rock",    "badge":"Boulder Badge","order":9, "page":"Brock",        "post_game":True,"region":"kanto"},
     {"name":"Misty",     "class":"gym_leader","specialty":"water",   "badge":"Cascade Badge","order":10,"page":"Misty",        "post_game":True,"region":"kanto"},
@@ -218,6 +221,19 @@ _HOENN_E4_RS = [
      }},
 ]
 
+_HOENN_EXTRA_MAGMA = [
+    {"name": "Wally", "class": "rival", "page": "Wally"},
+    {"name": "Maxie", "class": "boss", "specialty": "fire",  "page": "Maxie"},
+]
+_HOENN_EXTRA_AQUA = [
+    {"name": "Wally", "class": "rival", "page": "Wally"},
+    {"name": "Archie","class": "boss", "specialty": "water", "page": "Archie"},
+]
+_HOENN_EXTRA_EMERALD = [
+    {"name": "Wally", "class": "rival", "page": "Wally"},
+    {"name": "Maxie", "class": "boss", "specialty": "fire",  "page": "Maxie"},
+    {"name": "Archie","class": "boss", "specialty": "water", "page": "Archie"},
+]
 _SINNOH_GYMS = [
     {"name":"Roark",        "class":"gym_leader","specialty":"rock",    "badge":"Coal Badge",    "order":1,"page":"Roark"},
     {"name":"Gardenia",     "class":"gym_leader","specialty":"grass",   "badge":"Forest Badge",  "order":2,"page":"Gardenia"},
@@ -242,6 +258,9 @@ _SINNOH_E4 = [
      }},
 ]
 
+_SINNOH_BOSSES = [
+    {"name": "Cyrus", "class": "boss", "specialty": "mixed", "page": "Cyrus"},
+]
 _UNOVA_GYMS_BW = [
     {"name":"Cilan / Chili / Cress","class":"gym_leader","specialty":"grass/fire/water","badge":"Trio Badge",  "order":1,"page":"Cilan"},
     {"name":"Lenora",  "class":"gym_leader","specialty":"normal",  "badge":"Basic Badge",  "order":2,"page":"Lenora"},
@@ -261,6 +280,17 @@ _UNOVA_E4_BW = [
     {"name":"Cheren",  "class":"rival",                                    "page":"Cheren"},
     {"name":"Bianca",  "class":"rival",                                    "page":"Bianca"},
     {"name":"N",       "class":"boss",      "specialty":"mixed",           "page":"N"},
+    {"name":"Ghetsis", "class":"boss",      "specialty":"mixed",           "page":"Ghetsis"},
+]
+_UNOVA_E4_BW2 = [
+    {"name":"Shauntal","class":"elite_four","specialty":"ghost",   "order":1,"page":"Shauntal"},
+    {"name":"Marshal", "class":"elite_four","specialty":"fighting","order":2,"page":"Marshal"},
+    {"name":"Grimsley","class":"elite_four","specialty":"dark",    "order":3,"page":"Grimsley"},
+    {"name":"Caitlin", "class":"elite_four","specialty":"psychic", "order":4,"page":"Caitlin"},
+    {"name":"Iris",    "class":"champion",  "specialty":"dragon",           "page":"Iris"},
+    {"name":"Hugh",    "class":"rival",                                     "page":"Hugh"},
+    {"name":"N",       "class":"boss",      "specialty":"mixed",            "page":"N"},
+    {"name":"Ghetsis", "class":"boss",      "specialty":"mixed",            "page":"Ghetsis"},
 ]
 
 _KALOS_GYMS = [
@@ -291,6 +321,7 @@ _KALOS_E4 = [
          "froakie":"fennekin","frogadier":"fennekin","greninja":"fennekin",
          "chespin":"froakie","quilladin":"froakie","chesnaught":"froakie",
      }},
+    {"name":"Lysandre","class":"boss",      "specialty":"fire",             "page":"Lysandre"},
 ]
 
 # Gen 7: trial captains + island kahunas (mapped as gym_leader for consistency)
@@ -327,15 +358,15 @@ TRAINER_DEFS: dict[str, list[dict]] = {
     "yellow":       _KANTO_GYMS_RBY + _KANTO_E4_RBY,
     "firered":      _KANTO_GYMS_RBY + _KANTO_E4_RBY,
     "leafgreen":    _KANTO_GYMS_RBY + _KANTO_E4_RBY,
-    "gold":         _JOHTO_GYMS + _JOHTO_E4,
-    "silver":       _JOHTO_GYMS + _JOHTO_E4,
-    "crystal":      _JOHTO_GYMS + _JOHTO_E4,
-    "heartgold":    _JOHTO_GYMS + _KANTO_GYMS_HGSS + _JOHTO_E4,
-    "soulsilver":   _JOHTO_GYMS + _KANTO_GYMS_HGSS + _JOHTO_E4,
-    "ruby":         _HOENN_GYMS + _HOENN_E4_RS,
-    "sapphire":     _HOENN_GYMS + _HOENN_E4_RS,
-    "omega-ruby":   _HOENN_GYMS + _HOENN_E4_RS,
-    "alpha-sapphire":_HOENN_GYMS + _HOENN_E4_RS,
+    "gold":         _JOHTO_GYMS + _JOHTO_E4 + _JOHTO_POSTGAME,
+    "silver":       _JOHTO_GYMS + _JOHTO_E4 + _JOHTO_POSTGAME,
+    "crystal":      _JOHTO_GYMS + _JOHTO_E4 + _JOHTO_POSTGAME,
+    "heartgold":    _JOHTO_GYMS + _KANTO_GYMS_HGSS + _JOHTO_E4 + _JOHTO_POSTGAME,
+    "soulsilver":   _JOHTO_GYMS + _KANTO_GYMS_HGSS + _JOHTO_E4 + _JOHTO_POSTGAME,
+    "ruby":          _HOENN_GYMS + _HOENN_E4_RS + _HOENN_EXTRA_MAGMA,
+    "sapphire":      _HOENN_GYMS + _HOENN_E4_RS + _HOENN_EXTRA_AQUA,
+    "omega-ruby":    _HOENN_GYMS + _HOENN_E4_RS + _HOENN_EXTRA_MAGMA,
+    "alpha-sapphire":_HOENN_GYMS + _HOENN_E4_RS + _HOENN_EXTRA_AQUA,
     "emerald": [
         *[{**t, "name":"Juan", "page":"Juan"} if t["name"] == "Wallace" else t
           for t in _HOENN_GYMS],
@@ -356,14 +387,15 @@ TRAINER_DEFS: dict[str, list[dict]] = {
              "mudkip":"torchic","marshtomp":"torchic","swampert":"torchic",
              "treecko":"mudkip","grovyle":"mudkip","sceptile":"mudkip",
          }},
+        *_HOENN_EXTRA_EMERALD,
     ],
-    "diamond":      _SINNOH_GYMS + _SINNOH_E4,
-    "pearl":        _SINNOH_GYMS + _SINNOH_E4,
-    "platinum":     _SINNOH_GYMS + _SINNOH_E4,
+    "diamond":      _SINNOH_GYMS + _SINNOH_E4 + _SINNOH_BOSSES,
+    "pearl":        _SINNOH_GYMS + _SINNOH_E4 + _SINNOH_BOSSES,
+    "platinum":     _SINNOH_GYMS + _SINNOH_E4 + _SINNOH_BOSSES,
     "black":        _UNOVA_GYMS_BW + _UNOVA_E4_BW,
     "white":        _UNOVA_GYMS_BW + _UNOVA_E4_BW,
-    "black-2":      _UNOVA_GYMS_BW + _UNOVA_E4_BW,
-    "white-2":      _UNOVA_GYMS_BW + _UNOVA_E4_BW,
+    "black-2":      _UNOVA_GYMS_BW + _UNOVA_E4_BW2,
+    "white-2":      _UNOVA_GYMS_BW + _UNOVA_E4_BW2,
     "x":            _KALOS_GYMS + _KALOS_E4,
     "y":            _KALOS_GYMS + _KALOS_E4,
     "sun":          _ALOLA_CAPTAINS + _ALOLA_E4,
@@ -491,13 +523,599 @@ GAME_STATIC: dict[str, dict] = {
              "npc":"Sailor","location":"vermilion-city"},
         ],
     },
+
+    "yellow": {
+        "starters": [
+            # Yellow has no starter choice — Pikachu is forced
+            {"pokemon":"pikachu","pokemon_id":25,"note":"Forced starter — no choice given"},
+        ],
+        "static_encounters": [
+            {"pokemon":"snorlax","pokemon_id":143,"level":30,"location":"route-12",
+             "note":"Requires Poké Flute"},
+            {"pokemon":"snorlax","pokemon_id":143,"level":30,"location":"route-16",
+             "note":"Requires Poké Flute"},
+            {"pokemon":"articuno","pokemon_id":144,"level":50,"location":"seafoam-islands"},
+            {"pokemon":"zapdos",  "pokemon_id":145,"level":50,"location":"power-plant"},
+            {"pokemon":"moltres", "pokemon_id":146,"level":50,"location":"victory-road"},
+            {"pokemon":"mewtwo",  "pokemon_id":150,"level":70,"location":"cerulean-cave"},
+        ],
+        "gift_pokemon": [
+            # The three Kanto starters are NPC gifts in Yellow rather than the opening choice
+            {"pokemon":"bulbasaur", "pokemon_id":1,  "level":10,"location":"cerulean-city",
+             "source":"Melanie (requires Pikachu sufficiently happy)"},
+            {"pokemon":"charmander","pokemon_id":4,  "level":10,"location":"route-24",
+             "source":"Damian (requires Pikachu sufficiently happy)"},
+            {"pokemon":"squirtle",  "pokemon_id":7,  "level":10,"location":"vermilion-city",
+             "source":"Officer Jenny (requires Pikachu sufficiently happy)"},
+            {"pokemon":"eevee",    "pokemon_id":133,"level":25,"location":"celadon-city",
+             "source":"One-time pickup in Celadon Mansion top floor"},
+            {"pokemon":"lapras",   "pokemon_id":131,"level":15,"location":"silph-co",
+             "source":"NPC gift on 7F of Silph Co."},
+            {"pokemon":"aerodactyl","pokemon_id":142,"level":30,"location":"cinnabar-island",
+             "source":"Old Amber (from scientist in Pewter Museum)"},
+            {"pokemon":"omanyte",  "pokemon_id":138,"level":30,"location":"cinnabar-island",
+             "source":"Dome Fossil — mutually exclusive with Helix Fossil"},
+            {"pokemon":"kabuto",   "pokemon_id":140,"level":30,"location":"cinnabar-island",
+             "source":"Helix Fossil — mutually exclusive with Dome Fossil"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "firered": {
+        "starters": [
+            {"pokemon":"bulbasaur", "pokemon_id":1,"note":"Choose one at start"},
+            {"pokemon":"charmander","pokemon_id":4,"note":"Choose one at start"},
+            {"pokemon":"squirtle",  "pokemon_id":7,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"snorlax","pokemon_id":143,"level":30,"location":"route-12",
+             "note":"Requires Poké Flute"},
+            {"pokemon":"snorlax","pokemon_id":143,"level":30,"location":"route-16",
+             "note":"Requires Poké Flute"},
+            {"pokemon":"articuno","pokemon_id":144,"level":50,"location":"seafoam-islands"},
+            {"pokemon":"zapdos",  "pokemon_id":145,"level":50,"location":"power-plant"},
+            # Moved from Victory Road (RBY) to Mt. Ember on One Island in FRLG
+            {"pokemon":"moltres", "pokemon_id":146,"level":50,"location":"mt-ember",
+             "note":"Mt. Ember on One Island — not Victory Road as in the original games"},
+            {"pokemon":"mewtwo",  "pokemon_id":150,"level":70,"location":"cerulean-cave"},
+            # Post-National Pokédex: exactly one beast roams Kanto per file based on starter
+            {"pokemon":"raikou","pokemon_id":243,"level":50,"location":"kanto","roaming":True,
+             "note":"Roams Kanto post-National Pokédex if Squirtle was the chosen starter"},
+            {"pokemon":"entei", "pokemon_id":244,"level":50,"location":"kanto","roaming":True,
+             "note":"Roams Kanto post-National Pokédex if Bulbasaur was the chosen starter"},
+            {"pokemon":"suicune","pokemon_id":245,"level":50,"location":"kanto","roaming":True,
+             "note":"Roams Kanto post-National Pokédex if Charmander was the chosen starter"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"eevee",    "pokemon_id":133,"level":25,"location":"celadon-city",
+             "source":"One-time pickup in Celadon Mansion top floor"},
+            {"pokemon":"lapras",   "pokemon_id":131,"level":15,"location":"silph-co",
+             "source":"NPC gift on 7F of Silph Co."},
+            {"pokemon":"aerodactyl","pokemon_id":142,"level":30,"location":"cinnabar-island",
+             "source":"Old Amber (from scientist in Pewter Museum)"},
+            {"pokemon":"omanyte",  "pokemon_id":138,"level":30,"location":"cinnabar-island",
+             "source":"Dome Fossil — mutually exclusive with Helix Fossil"},
+            {"pokemon":"kabuto",   "pokemon_id":140,"level":30,"location":"cinnabar-island",
+             "source":"Helix Fossil — mutually exclusive with Dome Fossil"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "gold": {
+        "starters": [
+            {"pokemon":"chikorita","pokemon_id":152,"note":"Choose one at start"},
+            {"pokemon":"cyndaquil","pokemon_id":155,"note":"Choose one at start"},
+            {"pokemon":"totodile", "pokemon_id":158,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"gyarados",  "pokemon_id":130,"level":30,"location":"lake-of-rage",
+             "always_shiny":True,"note":"Red Gyarados — scripted shiny"},
+            {"pokemon":"snorlax",   "pokemon_id":143,"level":50,"location":"route-11",
+             "note":"Requires Poké Flute radio channel"},
+            {"pokemon":"snorlax",   "pokemon_id":143,"level":50,"location":"route-12",
+             "note":"Requires Poké Flute radio channel"},
+            {"pokemon":"sudowoodo", "pokemon_id":185,"level":20,"location":"route-36",
+             "note":"Requires Squirtbottle from Goldenrod flower shop"},
+            {"pokemon":"ho-oh",    "pokemon_id":250,"level":40,"location":"bell-tower",
+             "version_native":"gold","note":"Requires Rainbow Wing from Elder of Ecruteak City"},
+            {"pokemon":"lugia",    "pokemon_id":249,"level":40,"location":"whirl-islands",
+             "version_native":"silver","note":"Requires Silver Wing from Radio Tower director"},
+            {"pokemon":"raikou",   "pokemon_id":243,"level":40,"location":"johto",
+             "roaming":True,"note":"Roams Johto after Burned Tower trio is released"},
+            {"pokemon":"entei",    "pokemon_id":244,"level":40,"location":"johto",
+             "roaming":True,"note":"Roams Johto after Burned Tower trio is released"},
+            {"pokemon":"suicune",  "pokemon_id":245,"level":40,"location":"route-25",
+             "note":"Roams Johto in G/S; Crystal has fixed appearances before Route 25 final encounter"},
+            {"pokemon":"mewtwo",   "pokemon_id":150,"level":70,"location":"cerulean-cave",
+             "note":"Post-game Kanto"},
+            {"pokemon":"articuno", "pokemon_id":144,"level":50,"location":"seafoam-islands",
+             "note":"Post-game Kanto"},
+            {"pokemon":"zapdos",   "pokemon_id":145,"level":50,"location":"power-plant",
+             "note":"Post-game Kanto"},
+            {"pokemon":"moltres",  "pokemon_id":146,"level":50,"location":"mt-silver",
+             "note":"Post-game; Mt. Silver in G/S/C (moved from Victory Road in RBY)"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"togepi",  "pokemon_id":175,"level":1, "location":"mr-pokemons-house",
+             "source":"Mr. Pokémon (Egg)","note":"Mystery Egg delivered to Prof. Elm; hatches into Togepi"},
+            {"pokemon":"eevee",   "pokemon_id":133,"level":5, "location":"goldenrod-city",
+             "source":"Bill"},
+            {"pokemon":"tyrogue", "pokemon_id":236,"level":10,"location":"mt-mortar",
+             "source":"Karate King"},
+            {"pokemon":"dratini", "pokemon_id":147,"level":15,"location":"blackthorn-city",
+             "source":"Dragon's Den quiz reward"},
+        ],
+        "in_game_trades": [
+            {"give_pokemon":"bellsprout","give_pokemon_id":69,
+             "receive_pokemon":"onix",   "receive_pokemon_id":95, "receive_level":5,
+             "npc":"Schoolboy Jack","location":"violet-city"},
+            {"give_pokemon":"drowzee",   "give_pokemon_id":96,
+             "receive_pokemon":"machop", "receive_pokemon_id":66, "receive_level":5,
+             "npc":"Trainer","location":"goldenrod-city"},
+            {"give_pokemon":"krabby",    "give_pokemon_id":98,
+             "receive_pokemon":"voltorb","receive_pokemon_id":100,"receive_level":5,
+             "npc":"Fisher","location":"olivine-city"},
+        ],
+    },
+
+    "crystal": {
+        "starters": [
+            {"pokemon":"chikorita","pokemon_id":152,"note":"Choose one at start"},
+            {"pokemon":"cyndaquil","pokemon_id":155,"note":"Choose one at start"},
+            {"pokemon":"totodile", "pokemon_id":158,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"gyarados",  "pokemon_id":130,"level":30,"location":"lake-of-rage",
+             "always_shiny":True,"note":"Red Gyarados — scripted shiny"},
+            {"pokemon":"snorlax",   "pokemon_id":143,"level":50,"location":"route-11",
+             "note":"Requires Poké Flute radio channel"},
+            {"pokemon":"snorlax",   "pokemon_id":143,"level":50,"location":"route-12",
+             "note":"Requires Poké Flute radio channel"},
+            {"pokemon":"sudowoodo", "pokemon_id":185,"level":20,"location":"route-36",
+             "note":"Requires Squirtbottle from Goldenrod flower shop"},
+            # Ho-Oh and Lugia are both obtainable in Crystal at lv60 (vs lv40 in G/S)
+            {"pokemon":"ho-oh",    "pokemon_id":250,"level":60,"location":"bell-tower",
+             "note":"Requires Rainbow Wing; only available after defeating the Elite Four"},
+            {"pokemon":"lugia",    "pokemon_id":249,"level":60,"location":"whirl-islands",
+             "note":"Requires Silver Wing from Radio Tower director"},
+            {"pokemon":"raikou",   "pokemon_id":243,"level":40,"location":"johto",
+             "roaming":True,"note":"Roams Johto after Burned Tower trio is released"},
+            {"pokemon":"entei",    "pokemon_id":244,"level":40,"location":"johto",
+             "roaming":True,"note":"Roams Johto after Burned Tower trio is released"},
+            # Suicune: Crystal replaces roaming behaviour with a fixed 4-encounter sequence.
+            # First three appearances are scripted cutscenes (not catchable).
+            {"pokemon":"suicune",  "pokemon_id":245,"level":40,"location":"cianwood-city",
+             "note":"Scripted appearance — not catchable; first of 4 Crystal-exclusive encounters"},
+            {"pokemon":"suicune",  "pokemon_id":245,"level":40,"location":"mt-mortar",
+             "note":"Scripted appearance — not catchable; second Crystal encounter (Route 42 entrance)"},
+            {"pokemon":"suicune",  "pokemon_id":245,"level":40,"location":"vermilion-city",
+             "note":"Scripted appearance — not catchable; third Crystal encounter (Kanto)"},
+            {"pokemon":"suicune",  "pokemon_id":245,"level":40,"location":"route-25",
+             "note":"Final catchable encounter; preceded by three scripted appearances earlier in the game"},
+            {"pokemon":"mewtwo",   "pokemon_id":150,"level":70,"location":"cerulean-cave",
+             "note":"Post-game Kanto"},
+            {"pokemon":"articuno", "pokemon_id":144,"level":50,"location":"seafoam-islands",
+             "note":"Post-game Kanto"},
+            {"pokemon":"zapdos",   "pokemon_id":145,"level":50,"location":"power-plant",
+             "note":"Post-game Kanto"},
+            {"pokemon":"moltres",  "pokemon_id":146,"level":50,"location":"mt-silver",
+             "note":"Post-game; Mt. Silver in G/S/C (moved from Victory Road in RBY)"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"togepi",  "pokemon_id":175,"level":1, "location":"mr-pokemons-house",
+             "source":"Mr. Pokémon (Egg)","note":"Mystery Egg delivered to Prof. Elm; hatches into Togepi"},
+            {"pokemon":"eevee",   "pokemon_id":133,"level":5, "location":"goldenrod-city",
+             "source":"Bill"},
+            {"pokemon":"tyrogue", "pokemon_id":236,"level":10,"location":"mt-mortar",
+             "source":"Karate King"},
+            {"pokemon":"dratini", "pokemon_id":147,"level":15,"location":"blackthorn-city",
+             "source":"Dragon's Den quiz reward"},
+        ],
+        "in_game_trades": [
+            {"give_pokemon":"bellsprout","give_pokemon_id":69,
+             "receive_pokemon":"onix",   "receive_pokemon_id":95, "receive_level":5,
+             "npc":"Schoolboy Jack","location":"violet-city"},
+            {"give_pokemon":"drowzee",   "give_pokemon_id":96,
+             "receive_pokemon":"machop", "receive_pokemon_id":66, "receive_level":5,
+             "npc":"Trainer","location":"goldenrod-city"},
+            {"give_pokemon":"krabby",    "give_pokemon_id":98,
+             "receive_pokemon":"voltorb","receive_pokemon_id":100,"receive_level":5,
+             "npc":"Fisher","location":"olivine-city"},
+        ],
+    },
+
+    "ruby": {
+        "starters": [
+            {"pokemon":"treecko","pokemon_id":252,"note":"Choose one at start"},
+            {"pokemon":"torchic","pokemon_id":255,"note":"Choose one at start"},
+            {"pokemon":"mudkip", "pokemon_id":258,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"groudon",  "pokemon_id":383,"level":45,"location":"cave-of-origin",
+             "version_native":"ruby",
+             "note":"lv45 in RS; lv70 in Emerald (Terra Cave roaming post-story)"},
+            {"pokemon":"kyogre",   "pokemon_id":382,"level":45,"location":"cave-of-origin",
+             "version_native":"sapphire",
+             "note":"lv45 in RS; lv70 in Emerald (Marine Cave roaming post-story)"},
+            {"pokemon":"rayquaza", "pokemon_id":384,"level":70,"location":"sky-pillar",
+             "note":"Sky Pillar roof; accessible after the Sootopolis story arc"},
+            {"pokemon":"regirock", "pokemon_id":377,"level":40,"location":"route-111",
+             "note":"Desert Ruins (Route 111 desert); requires Relicanth + Wailord Sealed Chamber puzzle"},
+            {"pokemon":"regice",   "pokemon_id":378,"level":40,"location":"route-105",
+             "note":"Island Cave (Route 105); requires Sealed Chamber puzzle"},
+            {"pokemon":"registeel","pokemon_id":379,"level":40,"location":"route-120",
+             "note":"Ancient Tomb (Route 120); requires Sealed Chamber puzzle"},
+            {"pokemon":"latias",   "pokemon_id":380,"level":40,"location":"hoenn",
+             "roaming":True,"version_native":"ruby",
+             "note":"Roams Hoenn post-credits in Ruby; Latios roams in Sapphire"},
+            {"pokemon":"latios",   "pokemon_id":381,"level":40,"location":"hoenn",
+             "roaming":True,"version_native":"sapphire",
+             "note":"Roams Hoenn post-credits in Sapphire; Latias roams in Ruby"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"castform","pokemon_id":351,"level":25,"location":"route-119",
+             "source":"Weather Institute researcher (after clearing Team Aqua/Magma)"},
+            {"pokemon":"wynaut",  "pokemon_id":360,"level":1, "location":"lavaridge-town",
+             "source":"Old lady in Lavaridge Town hot springs (Egg)"},
+            {"pokemon":"beldum",  "pokemon_id":374,"level":5, "location":"mossdeep-city",
+             "source":"Steven's house (post-game)"},
+            {"pokemon":"lileep",  "pokemon_id":345,"level":20,"location":"rustboro-city",
+             "source":"Root Fossil revived at Devon Corporation",
+             "version_native":"ruby","note":"Root Fossil from Mirage Tower desert; Claw Fossil in Sapphire"},
+            {"pokemon":"anorith", "pokemon_id":347,"level":20,"location":"rustboro-city",
+             "source":"Claw Fossil revived at Devon Corporation",
+             "version_native":"sapphire","note":"Claw Fossil from Mirage Tower; Root Fossil in Ruby"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "diamond": {
+        "starters": [
+            {"pokemon":"turtwig", "pokemon_id":387,"note":"Choose one at start"},
+            {"pokemon":"chimchar","pokemon_id":390,"note":"Choose one at start"},
+            {"pokemon":"piplup",  "pokemon_id":393,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"dialga",   "pokemon_id":483,"level":47,"location":"mt-coronet",
+             "version_native":"diamond","note":"Spear Pillar; Palkia in Pearl"},
+            {"pokemon":"palkia",   "pokemon_id":484,"level":47,"location":"mt-coronet",
+             "version_native":"pearl","note":"Spear Pillar; Dialga in Diamond"},
+            {"pokemon":"giratina", "pokemon_id":487,"level":47,"location":"distortion-world",
+             "version_native":"platinum",
+             "note":"Distortion World in Platinum; post-game Turnback Cave in Diamond/Pearl (not tracked)"},
+            {"pokemon":"uxie",     "pokemon_id":480,"level":50,"location":"lake-acuity",
+             "note":"Lake Acuity; available after the Spear Pillar arc"},
+            {"pokemon":"mesprit",  "pokemon_id":481,"level":50,"location":"route-201",
+             "roaming":True,"note":"Lake Verity (Route 201 area); roams Sinnoh after first visit"},
+            {"pokemon":"azelf",    "pokemon_id":482,"level":50,"location":"route-214",
+             "note":"Lake Valor (Route 214 / Pastoria area)"},
+            {"pokemon":"heatran",  "pokemon_id":485,"level":70,"location":"stark-mountain",
+             "note":"Post-game; Stark Mountain interior (Route 227)"},
+            {"pokemon":"regigigas","pokemon_id":486,"level":1, "location":"snowpoint-temple",
+             "note":"Post-game; requires Regirock, Regice, and Registeel in party"},
+            {"pokemon":"cresselia","pokemon_id":488,"level":50,"location":"route-205",
+             "roaming":True,
+             "note":"Fullmoon Island (via Canalave City sailor); roams Sinnoh after first encounter"},
+            {"pokemon":"rotom",    "pokemon_id":479,"level":15,"location":"eterna-forest",
+             "note":"Old Chateau in Eterna Forest; appears only at night"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"riolu",   "pokemon_id":447,"level":1, "location":"iron-island",
+             "source":"Riley (Egg)","note":"Hatches into Riolu after clearing Iron Island with Riley"},
+            {"pokemon":"cranidos","pokemon_id":408,"level":20,"location":"oreburgh-city",
+             "source":"Skull Fossil revived at Oreburgh Museum",
+             "version_native":"diamond","note":"Armor Fossil (Shieldon) in Pearl"},
+            {"pokemon":"shieldon","pokemon_id":410,"level":20,"location":"oreburgh-city",
+             "source":"Armor Fossil revived at Oreburgh Museum",
+             "version_native":"pearl","note":"Skull Fossil (Cranidos) in Diamond"},
+            {"pokemon":"eevee",   "pokemon_id":133,"level":5, "location":"hearthome-city",
+             "source":"Bebe (PC system developer)"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "black": {
+        "starters": [
+            {"pokemon":"snivy",   "pokemon_id":495,"note":"Choose one at start"},
+            {"pokemon":"tepig",   "pokemon_id":498,"note":"Choose one at start"},
+            {"pokemon":"oshawott","pokemon_id":501,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"reshiram", "pokemon_id":643,"level":50,"location":"pokemon-league",
+             "version_native":"black",
+             "note":"Light Stone awakens at N's Castle (attached to Pokémon League); required catch"},
+            {"pokemon":"zekrom",   "pokemon_id":644,"level":50,"location":"pokemon-league",
+             "version_native":"white",
+             "note":"Dark Stone awakens at N's Castle; required catch before final N battle"},
+            {"pokemon":"cobalion", "pokemon_id":638,"level":42,"location":"route-6",
+             "note":"Mistralton Cave (Route 6 area); meet after obtaining HM Strength"},
+            {"pokemon":"terrakion","pokemon_id":639,"level":42,"location":"victory-road",
+             "note":"Victory Road; requires meeting Cobalion first"},
+            {"pokemon":"virizion", "pokemon_id":640,"level":42,"location":"pinwheel-forest",
+             "note":"Rumination Field in Pinwheel Forest; requires meeting Cobalion first"},
+            {"pokemon":"tornadus", "pokemon_id":641,"level":40,"location":"unova",
+             "roaming":True,"version_native":"black",
+             "note":"Roams Unova during storms; first appears on Route 7"},
+            {"pokemon":"thundurus","pokemon_id":642,"level":40,"location":"unova",
+             "roaming":True,"version_native":"white",
+             "note":"Roams Unova during thunderstorms; first appears on Route 7"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"tirtouga","pokemon_id":564,"level":25,"location":"nacrene-city",
+             "source":"Cover Fossil revived at Nacrene City Museum",
+             "version_native":"black","note":"Plume Fossil (Archen) in White"},
+            {"pokemon":"archen",  "pokemon_id":566,"level":25,"location":"nacrene-city",
+             "source":"Plume Fossil revived at Nacrene City Museum",
+             "version_native":"white","note":"Cover Fossil (Tirtouga) in Black"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "black-2": {
+        "starters": [
+            {"pokemon":"snivy",   "pokemon_id":495,"note":"Choose one at start"},
+            {"pokemon":"tepig",   "pokemon_id":498,"note":"Choose one at start"},
+            {"pokemon":"oshawott","pokemon_id":501,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"zekrom",   "pokemon_id":644,"level":70,"location":"giant-chasm",
+             "version_native":"black-2",
+             "note":"Black 2: Zekrom freed from Kyurem fusion at Giant Chasm; must be caught"},
+            {"pokemon":"reshiram", "pokemon_id":643,"level":70,"location":"giant-chasm",
+             "version_native":"white-2",
+             "note":"White 2: Reshiram freed from Kyurem fusion at Giant Chasm; must be caught"},
+            {"pokemon":"kyurem",   "pokemon_id":646,"level":70,"location":"giant-chasm",
+             "note":"Giant Chasm; Kyurem-Black in B2, Kyurem-White in W2"},
+            {"pokemon":"cobalion", "pokemon_id":638,"level":45,"location":"route-6",
+             "note":"Mistralton Cave (Route 6 area); available after badge 5"},
+            {"pokemon":"terrakion","pokemon_id":639,"level":42,"location":"victory-road",
+             "note":"Victory Road; requires meeting Cobalion first"},
+            {"pokemon":"virizion", "pokemon_id":640,"level":45,"location":"pinwheel-forest",
+             "note":"Pinwheel Forest (not in BW2 ROUTE_ORDER; generates a data warning)"},
+            {"pokemon":"thundurus","pokemon_id":642,"level":40,"location":"unova",
+             "roaming":True,"version_native":"black-2",
+             "note":"Roams in Black 2; Tornadus roams in White 2"},
+            {"pokemon":"tornadus", "pokemon_id":641,"level":40,"location":"unova",
+             "roaming":True,"version_native":"white-2",
+             "note":"Roams in White 2; Thundurus roams in Black 2"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"tirtouga","pokemon_id":564,"level":25,"location":"nacrene-city",
+             "source":"Cover Fossil revived at Nacrene City Museum",
+             "version_native":"black-2","note":"Plume Fossil (Archen) in White 2"},
+            {"pokemon":"archen",  "pokemon_id":566,"level":25,"location":"nacrene-city",
+             "source":"Plume Fossil revived at Nacrene City Museum",
+             "version_native":"white-2","note":"Cover Fossil (Tirtouga) in Black 2"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "x": {
+        "starters": [
+            {"pokemon":"chespin",  "pokemon_id":650,"note":"Choose one at start"},
+            {"pokemon":"fennekin", "pokemon_id":653,"note":"Choose one at start"},
+            {"pokemon":"froakie",  "pokemon_id":656,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"xerneas","pokemon_id":716,"level":50,"location":"geosenge-town",
+             "version_native":"x",
+             "note":"Team Flare Secret HQ beneath Geosenge Town; forced story catch"},
+            {"pokemon":"yveltal", "pokemon_id":717,"level":50,"location":"geosenge-town",
+             "version_native":"y",
+             "note":"Team Flare Secret HQ beneath Geosenge Town; forced story catch"},
+            {"pokemon":"zygarde", "pokemon_id":718,"level":70,"location":"terminus-cave",
+             "note":"Terminus Cave (Route 18); post-game"},
+            {"pokemon":"mewtwo",  "pokemon_id":150,"level":70,"location":"route-20",
+             "note":"Pokémon Village (Winding Woods / Route 20); post-game"},
+            {"pokemon":"articuno","pokemon_id":144,"level":70,"location":"azure-bay",
+             "note":"Roams 10 Kalos routes then settles at Sea Spirit's Den (Azure Bay); which bird depends on starter"},
+            {"pokemon":"zapdos",  "pokemon_id":145,"level":70,"location":"azure-bay",
+             "note":"Roams 10 Kalos routes then settles at Sea Spirit's Den (Azure Bay); which bird depends on starter"},
+            {"pokemon":"moltres", "pokemon_id":146,"level":70,"location":"azure-bay",
+             "note":"Roams 10 Kalos routes then settles at Sea Spirit's Den (Azure Bay); which bird depends on starter"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"bulbasaur", "pokemon_id":1,  "level":10,"location":"lumiose-city",
+             "source":"Professor Sycamore","note":"Choose one of the three Kanto starters"},
+            {"pokemon":"charmander","pokemon_id":4,  "level":10,"location":"lumiose-city",
+             "source":"Professor Sycamore","note":"Choose one of the three Kanto starters"},
+            {"pokemon":"squirtle", "pokemon_id":7,  "level":10,"location":"lumiose-city",
+             "source":"Professor Sycamore","note":"Choose one of the three Kanto starters"},
+            {"pokemon":"lucario",  "pokemon_id":448,"level":32,"location":"tower-of-mastery",
+             "source":"Korrina","note":"Korrina's Lucario with Mega Stone"},
+            {"pokemon":"tyrunt",   "pokemon_id":696,"level":20,"location":"ambrette-town",
+             "source":"Jaw Fossil revived at Fossil Lab",
+             "version_native":"x","note":"Sail Fossil (Amaura) in Y"},
+            {"pokemon":"amaura",   "pokemon_id":698,"level":20,"location":"ambrette-town",
+             "source":"Sail Fossil revived at Fossil Lab",
+             "version_native":"y","note":"Jaw Fossil (Tyrunt) in X"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "sun": {
+        "starters": [
+            {"pokemon":"rowlet",  "pokemon_id":722,"note":"Choose one at start"},
+            {"pokemon":"litten",  "pokemon_id":725,"note":"Choose one at start"},
+            {"pokemon":"popplio", "pokemon_id":728,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"solgaleo","pokemon_id":791,"level":53,"location":"altar-of-sunne",
+             "version_native":"sun",
+             "note":"Evolves from Cosmoem at Altar of the Sunne during the story"},
+            {"pokemon":"lunala",  "pokemon_id":792,"level":53,"location":"altar-of-sunne",
+             "version_native":"moon",
+             "note":"Evolves from Cosmoem at Altar of the Moone during the story"},
+            {"pokemon":"tapu-koko","pokemon_id":785,"level":60,"location":"iki-town",
+             "note":"Post-game; Ruins of Conflict on Melemele Island"},
+            {"pokemon":"tapu-lele","pokemon_id":786,"level":60,"location":"ruins-of-life",
+             "note":"Post-game; Ruins of Life on Akala Island"},
+            {"pokemon":"tapu-bulu","pokemon_id":787,"level":60,"location":"poni-plains",
+             "note":"Post-game; Ruins of Abundance on Poni Island (Poni Meadow)"},
+            {"pokemon":"tapu-fini","pokemon_id":788,"level":60,"location":"ancient-poni-path",
+             "note":"Post-game; Ruins of Hope at the end of Ancient Poni Path"},
+            {"pokemon":"cosmog",  "pokemon_id":789,"level":5, "location":"altar-of-sunne",
+             "note":"Post-game; second Cosmog at the Lake of the Sunne/Moone"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"type-null","pokemon_id":772,"level":40,"location":"aether-paradise",
+             "source":"Gladion (post-game)","note":"Given after becoming Champion; comes with Memories"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "emerald": {
+        "starters": [
+            {"pokemon":"treecko","pokemon_id":252,"note":"Choose one at start"},
+            {"pokemon":"torchic","pokemon_id":255,"note":"Choose one at start"},
+            {"pokemon":"mudkip", "pokemon_id":258,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            # Both available post-E4; location rotates daily via Weather Institute TV
+            {"pokemon":"groudon",  "pokemon_id":383,"level":70,"location":"hoenn","roaming":True,
+             "note":"Terra Cave — roams Hoenn post-E4; exact location broadcast by Weather Institute TV"},
+            {"pokemon":"kyogre",   "pokemon_id":382,"level":70,"location":"hoenn","roaming":True,
+             "note":"Marine Cave — roams Hoenn post-E4; exact location broadcast by Weather Institute TV"},
+            {"pokemon":"rayquaza", "pokemon_id":384,"level":70,"location":"sky-pillar",
+             "note":"Sky Pillar roof; accessible after the Sootopolis story arc"},
+            {"pokemon":"regirock", "pokemon_id":377,"level":40,"location":"route-111",
+             "note":"Desert Ruins; requires Relicanth + Wailord Sealed Chamber puzzle"},
+            {"pokemon":"regice",   "pokemon_id":378,"level":40,"location":"route-105",
+             "note":"Island Cave; requires Sealed Chamber puzzle"},
+            {"pokemon":"registeel","pokemon_id":379,"level":40,"location":"route-120",
+             "note":"Ancient Tomb; requires Sealed Chamber puzzle"},
+            # After the E4, a TV broadcast lets the player choose one to roam;
+            # the other is catchable at Southern Island via the Eon Ticket.
+            {"pokemon":"latias","pokemon_id":380,"level":40,"location":"hoenn","roaming":True,
+             "note":"Player's choice roamer from post-E4 TV; other available at Southern Island (Eon Ticket)"},
+            {"pokemon":"latios","pokemon_id":381,"level":40,"location":"hoenn","roaming":True,
+             "note":"Player's choice roamer from post-E4 TV; other available at Southern Island (Eon Ticket)"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"castform","pokemon_id":351,"level":25,"location":"route-119",
+             "source":"Weather Institute researcher (after clearing Team Aqua/Magma)"},
+            {"pokemon":"wynaut",  "pokemon_id":360,"level":1, "location":"lavaridge-town",
+             "source":"Old lady in Lavaridge Town hot springs (Egg)"},
+            {"pokemon":"beldum",  "pokemon_id":374,"level":5, "location":"mossdeep-city",
+             "source":"Steven's house (post-game; received via e-mail)"},
+            # Both fossils are eventually obtainable in Emerald via the Mirage Tower desert
+            {"pokemon":"lileep",  "pokemon_id":345,"level":20,"location":"rustboro-city",
+             "source":"Root Fossil revived at Devon Corporation"},
+            {"pokemon":"anorith", "pokemon_id":347,"level":20,"location":"rustboro-city",
+             "source":"Claw Fossil revived at Devon Corporation"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "omega-ruby": {
+        "starters": [
+            {"pokemon":"treecko","pokemon_id":252,"note":"Choose one at start"},
+            {"pokemon":"torchic","pokemon_id":255,"note":"Choose one at start"},
+            {"pokemon":"mudkip", "pokemon_id":258,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"groudon",  "pokemon_id":383,"level":45,"location":"cave-of-origin",
+             "version_native":"omega-ruby",
+             "note":"Primal Groudon; required story encounter"},
+            {"pokemon":"kyogre",   "pokemon_id":382,"level":45,"location":"cave-of-origin",
+             "version_native":"alpha-sapphire",
+             "note":"Primal Kyogre; required story encounter"},
+            # Delta Episode: Rayquaza must be caught to advance the story
+            {"pokemon":"rayquaza", "pokemon_id":384,"level":70,"location":"sky-pillar",
+             "note":"Delta Episode; Sky Pillar summit — must be caught to continue the story"},
+            # Deoxys appears in space at the climax of the Delta Episode
+            {"pokemon":"deoxys",   "pokemon_id":386,"level":80,"location":"sky-pillar",
+             "note":"Delta Episode; space encounter accessible via Sky Pillar"},
+            {"pokemon":"regirock", "pokemon_id":377,"level":40,"location":"route-111",
+             "note":"Desert Ruins; requires Relicanth + Wailord Sealed Chamber puzzle"},
+            {"pokemon":"regice",   "pokemon_id":378,"level":40,"location":"route-105",
+             "note":"Island Cave; requires Sealed Chamber puzzle"},
+            {"pokemon":"registeel","pokemon_id":379,"level":40,"location":"route-120",
+             "note":"Ancient Tomb; requires Sealed Chamber puzzle"},
+            {"pokemon":"regigigas","pokemon_id":486,"level":50,"location":"route-105",
+             "note":"Island Cave; requires all three Regis in party (Regice holding Snowball, Registeel holding Magnet)"},
+            {"pokemon":"latias","pokemon_id":380,"level":40,"location":"southern-island",
+             "version_native":"omega-ruby",
+             "note":"Given as story companion via Eon Flute; catchable at Southern Island"},
+            {"pokemon":"latios","pokemon_id":381,"level":40,"location":"southern-island",
+             "version_native":"alpha-sapphire",
+             "note":"Given as story companion via Eon Flute; catchable at Southern Island"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"castform","pokemon_id":351,"level":25,"location":"route-119",
+             "source":"Weather Institute researcher (after clearing Team Aqua/Magma)"},
+            {"pokemon":"wynaut",  "pokemon_id":360,"level":1, "location":"lavaridge-town",
+             "source":"Old lady in Lavaridge Town hot springs (Egg)"},
+            {"pokemon":"beldum",  "pokemon_id":374,"level":5, "location":"mossdeep-city",
+             "source":"Steven's house (post-game)"},
+            {"pokemon":"lileep",  "pokemon_id":345,"level":20,"location":"rustboro-city",
+             "source":"Root Fossil revived at Devon Corporation",
+             "version_native":"omega-ruby","note":"Claw Fossil (Anorith) in Alpha Sapphire"},
+            {"pokemon":"anorith", "pokemon_id":347,"level":20,"location":"rustboro-city",
+             "source":"Claw Fossil revived at Devon Corporation",
+             "version_native":"alpha-sapphire","note":"Root Fossil (Lileep) in Omega Ruby"},
+        ],
+        "in_game_trades": [],
+    },
+
+    "ultra-sun": {
+        "starters": [
+            {"pokemon":"rowlet",  "pokemon_id":722,"note":"Choose one at start"},
+            {"pokemon":"litten",  "pokemon_id":725,"note":"Choose one at start"},
+            {"pokemon":"popplio", "pokemon_id":728,"note":"Choose one at start"},
+        ],
+        "static_encounters": [
+            {"pokemon":"solgaleo","pokemon_id":791,"level":55,"location":"altar-of-sunne",
+             "version_native":"ultra-sun",
+             "note":"Evolves from Cosmoem at the Altar of the Sunne during the story"},
+            {"pokemon":"lunala",  "pokemon_id":792,"level":55,"location":"altar-of-sunne",
+             "version_native":"ultra-moon",
+             "note":"Evolves from Cosmoem at the Altar of the Moone during the story"},
+            # Necrozma fuses with the version mascot during the story; catchable post-E4
+            {"pokemon":"necrozma","pokemon_id":800,"level":75,"location":"mount-lanakila",
+             "note":"Appears at the summit of Mount Lanakila after first clearing the Elite Four"},
+            {"pokemon":"tapu-koko","pokemon_id":785,"level":60,"location":"iki-town",
+             "note":"Post-game; Ruins of Conflict on Melemele Island"},
+            {"pokemon":"tapu-lele","pokemon_id":786,"level":60,"location":"ruins-of-life",
+             "note":"Post-game; Ruins of Life on Akala Island"},
+            {"pokemon":"tapu-bulu","pokemon_id":787,"level":60,"location":"poni-plains",
+             "note":"Post-game; Ruins of Abundance on Poni Island"},
+            {"pokemon":"tapu-fini","pokemon_id":788,"level":60,"location":"ancient-poni-path",
+             "note":"Post-game; Ruins of Hope at the end of Ancient Poni Path"},
+            # Version-exclusive Ultra Beasts (post-game)
+            {"pokemon":"blacephalon","pokemon_id":806,"level":60,"location":"poni-grove",
+             "version_native":"ultra-sun",
+             "note":"Post-game; UB Burst — appears in Poni Grove and adjacent areas"},
+            {"pokemon":"stakataka",  "pokemon_id":805,"level":60,"location":"poni-grove",
+             "version_native":"ultra-moon",
+             "note":"Post-game; UB Assembly — appears in Poni Grove and adjacent areas"},
+            {"pokemon":"cosmog","pokemon_id":789,"level":5,"location":"altar-of-sunne",
+             "note":"Post-game; second Cosmog at the Lake of the Sunne / Moone"},
+        ],
+        "gift_pokemon": [
+            {"pokemon":"type-null","pokemon_id":772,"level":40,"location":"aether-paradise",
+             "source":"Gladion (post-game)","note":"Given after becoming Champion; comes with Memories"},
+            {"pokemon":"poipole",  "pokemon_id":803,"level":40,"location":"poni-island",
+             "source":"Ultra Recon Squad member (post-game)",
+             "note":"Given after defeating the Elite Four for the first time"},
+        ],
+        "in_game_trades": [],
+    },
 }
 # Alias version pairs to the same static data dict
-GAME_STATIC["soulsilver"] = GAME_STATIC["heartgold"]
-GAME_STATIC["blue"]       = GAME_STATIC["red"]
-GAME_STATIC["yellow"]     = GAME_STATIC["red"]
-GAME_STATIC["firered"]    = GAME_STATIC["red"]
-GAME_STATIC["leafgreen"]  = GAME_STATIC["red"]
+GAME_STATIC["soulsilver"]     = GAME_STATIC["heartgold"]
+GAME_STATIC["silver"]         = GAME_STATIC["gold"]
+GAME_STATIC["blue"]           = GAME_STATIC["red"]
+GAME_STATIC["leafgreen"]      = GAME_STATIC["firered"]
+GAME_STATIC["sapphire"]       = GAME_STATIC["ruby"]
+GAME_STATIC["alpha-sapphire"] = GAME_STATIC["omega-ruby"]
+GAME_STATIC["pearl"]          = GAME_STATIC["diamond"]
+GAME_STATIC["platinum"]       = GAME_STATIC["diamond"]
+GAME_STATIC["white"]          = GAME_STATIC["black"]
+GAME_STATIC["white-2"]        = GAME_STATIC["black-2"]
+GAME_STATIC["y"]              = GAME_STATIC["x"]
+GAME_STATIC["moon"]           = GAME_STATIC["sun"]
+GAME_STATIC["ultra-moon"]     = GAME_STATIC["ultra-sun"]
 
 
 # ── Route unlock order ─────────────────────────────────────────────────────────
@@ -704,7 +1322,11 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(22, "route-117",        "Route 117",           badges=3),
         _r(23, "route-111",        "Route 111",           badges=3),
         _r(24, "route-112",        "Route 112",           badges=3),
-        _r(25, "lavaridge-town",   "Lavaridge Town",      event="gym4_heat"),
+        _r(24, "meteor-falls",     "Meteor Falls",        badges=3),
+        _r(25, "fiery-path",       "Fiery Path",          badges=3),
+        _r(25, "mt-chimney",       "Mt. Chimney",         badges=3),
+        _r(25, "jagged-pass",      "Jagged Pass",         badges=3),
+        _r(26, "lavaridge-town",   "Lavaridge Town",      event="gym4_heat"),
         _r(26, "petalburg-city",   "Petalburg City (Gym)",badges=4, event="gym5_balance"),
         _r(27, "route-118",        "Route 118",           badges=5, hm="surf"),
         _r(28, "route-119",        "Route 119",           badges=5, hm="surf"),
@@ -718,8 +1340,11 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(36, "mossdeep-city",    "Mossdeep City",       event="gym7_mind"),
         _r(37, "route-124",        "Route 124",           hm="surf"),
         _r(38, "route-125",        "Route 125",           hm="surf"),
+        _r(38, "shoal-cave",       "Shoal Cave",          hm="surf"),
         _r(39, "route-126",        "Route 126",           hm="surf"),
-        _r(40, "sootopolis-city",  "Sootopolis City",     hm="surf", event="gym8_rain"),
+        _r(39, "seafloor-cavern",  "Seafloor Cavern",     hm="dive"),
+        _r(40, "cave-of-origin",   "Cave of Origin",      hm="dive"),
+        _r(41, "sootopolis-city",  "Sootopolis City",     hm="surf", event="gym8_rain"),
         _r(41, "route-127",        "Route 127",           hm="surf"),
         _r(42, "route-128",        "Route 128",           hm="surf"),
         _r(43, "route-129",        "Route 129",           hm="surf"),
@@ -751,6 +1376,7 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(14, "eterna-city",      "Eterna City",         event="gym2_forest"),
         _r(15, "eterna-forest",    "Eterna Forest"),
         _r(16, "route-206",        "Route 206",           hm="cut"),
+        _r(16, "wayward-cave",     "Wayward Cave",        badges=2, hm="cut"),
         _r(17, "route-207",        "Route 207"),
         _r(18, "mt-coronet",       "Mt. Coronet",         note="Accessible early; full traverse unlocked later"),
         _r(19, "route-208",        "Route 208",           badges=2),
@@ -767,16 +1393,22 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(30, "hearthome-city",   "Hearthome City (Gym)",badges=4, event="gym5_relic"),
         _r(31, "route-218",        "Route 218",           hm="surf"),
         _r(32, "canalave-city",    "Canalave City",       hm="surf", event="gym6_mine"),
+        _r(32, "iron-island",      "Iron Island",         badges=6, hm="surf"),
         _r(33, "route-216",        "Route 216",           badges=6),
         _r(34, "route-217",        "Route 217",           badges=6),
         _r(35, "snowpoint-city",   "Snowpoint City",      event="gym7_icicle"),
         _r(36, "lake-acuity",      "Lake Acuity",         badges=7),
+        _r(37, "distortion-world", "Distortion World",    badges=7, note="Platinum only"),
         _r(37, "route-222",        "Route 222",           badges=7),
         _r(38, "sunyshore-city",   "Sunyshore City",      event="gym8_beacon"),
         _r(39, "route-223",        "Route 223",           badges=8, hm="surf"),
-        _r(40, "victory-road",     "Victory Road",        badges=8, hm="strength"),
+        _r(40, "victory-road-sinnoh", "Victory Road",     badges=8, hm="rock-climb"),
         _r(41, "pokemon-league",   "Pokémon League",      badges=8,
            note="E4: Aaron → Bertha → Flint → Lucian → Cynthia"),
+        _r(42, "snowpoint-temple", "Snowpoint Temple",    badges=8, note="Post-game; requires all lake guardians defeated"),
+        _r(43, "route-227",        "Route 227",           badges=8, hm="rock-climb"),
+        _r(43, "stark-mountain",   "Stark Mountain",      badges=8, hm="rock-climb",
+           note="Post-game; Heatran lv70"),
     ],
 
     # ── Unova (Black / White) ────────────────────────────────────────────────
@@ -937,6 +1569,7 @@ ROUTE_ORDER: dict[str, list[dict]] = {
         _r(37, "route-16",          "Route 16",             badges=6),
         _r(38, "dendemille-town",   "Dendemille Town",      badges=6),
         _r(39, "route-17",          "Route 17",             badges=6),
+        _r(39, "frost-cavern",      "Frost Cavern",         badges=6),
         _r(40, "anistar-city",      "Anistar City",         event="gym7_psychic",
            note="Gym 7: Olympia (Psychic)"),
         _r(41, "route-18",          "Route 18",             badges=7),
@@ -1160,6 +1793,105 @@ def _loc(lid: str, display: str, floors: list) -> dict:
     return {"id": lid, "display_name": display, "floors": floors}
 
 
+_GSC_CAVE_MAPS: list[dict] = [
+    _loc("sprout-tower", "Sprout Tower", [
+        _floor("sprout-tower-1f", "1F", "Sprout Tower 1F GSC.png"),
+        _floor("sprout-tower-2f", "2F", "Sprout Tower 2F GSC.png"),
+        _floor("sprout-tower-3f", "3F", "Sprout Tower 3F GSC.png"),
+    ]),
+    _loc("union-cave", "Union Cave", [
+        _floor("union-cave-1f",  "1F",  "Union Cave 1F GSC.png"),
+        _floor("union-cave-b1f", "B1F", "Union Cave B1F GSC.png"),
+        _floor("union-cave-b2f", "B2F", "Union Cave B2F GSC.png"),
+    ]),
+    _loc("slowpoke-well", "Slowpoke Well", [
+        _floor("slowpoke-well-b1f", "B1F", "Slowpoke Well B1F GSC.png"),
+        _floor("slowpoke-well-b2f", "B2F", "Slowpoke Well B2F GSC.png"),
+    ]),
+    _loc("ilex-forest", "Ilex Forest", [
+        _floor("ilex-forest", "Forest", "Ilex Forest GSC.png"),
+    ]),
+    _loc("mt-mortar", "Mt. Mortar", [
+        _floor("mt-mortar-entrance",   "Entrance",   "Mt Mortar Entrance GSC.png"),
+        _floor("mt-mortar-basement",   "Basement",   "Mt Mortar Basement GSC.png"),
+        _floor("mt-mortar-upper-cave", "Upper Cave", "Mt Mortar Upper Cave GSC.png"),
+        _floor("mt-mortar-lower-cave", "Lower Cave", "Mt Mortar Lower Cave GSC.png"),
+    ]),
+    _loc("burned-tower", "Burned Tower", [
+        _floor("burned-tower-1f",  "1F",  "Burned Tower 1F GSC.png"),
+        _floor("burned-tower-b1f", "B1F", "Burned Tower B1F GSC.png"),
+    ]),
+    _loc("bell-tower", "Bell Tower", [
+        _floor("bell-tower-1f",  "1F",  "Bell Tower 1F GSC.png"),
+        _floor("bell-tower-2f",  "2F",  "Bell Tower 2F GSC.png"),
+        _floor("bell-tower-3f",  "3F",  "Bell Tower 3F GSC.png"),
+        _floor("bell-tower-4f",  "4F",  "Bell Tower 4F GSC.png"),
+        _floor("bell-tower-5f",  "5F",  "Bell Tower 5F GSC.png"),
+        _floor("bell-tower-6f",  "6F",  "Bell Tower 6F GSC.png"),
+        _floor("bell-tower-7f",  "7F",  "Bell Tower 7F GSC.png"),
+        _floor("bell-tower-8f",  "8F",  "Bell Tower 8F GSC.png"),
+        _floor("bell-tower-9f",  "9F",  "Bell Tower 9F GSC.png"),
+        _floor("bell-tower-10f", "10F", "Bell Tower 10F GSC.png"),
+    ]),
+    _loc("dark-cave", "Dark Cave", [
+        _floor("dark-cave-1", "Violet City Side",    "Dark Cave 1 GSC.png"),
+        _floor("dark-cave-2", "Blackthorn City Side","Dark Cave 2 GSC.png"),
+    ]),
+    _loc("ice-path", "Ice Path", [
+        _floor("ice-path-1f",  "1F",  "Ice Path 1F GSC.png"),
+        _floor("ice-path-b1f", "B1F", "Ice Path B1F GSC.png"),
+        _floor("ice-path-b2f", "B2F", "Ice Path B2F GSC.png"),
+        _floor("ice-path-b3f", "B3F", "Ice Path B3F GSC.png"),
+    ]),
+    _loc("dragons-den", "Dragon's Den", [
+        _floor("dragons-den-entrance", "Entrance", "Dragons Den Entrance GSC.png"),
+        _floor("dragons-den-interior", "Interior", "Dragons Den GSC.png"),
+    ]),
+    _loc("whirl-islands", "Whirl Islands", [
+        _floor("whirl-islands-1f-nw", "1F (NW Island)", "Whirl Islands 1F NW GSC.png"),
+        _floor("whirl-islands-1f-ne", "1F (NE Island)", "Whirl Islands 1F NE GSC.png"),
+        _floor("whirl-islands-1f-sw", "1F (SW Island)", "Whirl Islands 1F SW GSC.png"),
+        _floor("whirl-islands-1f-se", "1F (SE Island)", "Whirl Islands 1F SE GSC.png"),
+        _floor("whirl-islands-b1f",   "B1F",            "Whirl Islands B1F GSC.png"),
+        _floor("whirl-islands-b2f",   "B2F",            "Whirl Islands B2F GSC.png"),
+        _floor("whirl-islands-b3f",   "B3F",            "Whirl Islands B3F GSC.png"),
+    ]),
+    _loc("mt-silver", "Mt. Silver", [
+        _floor("mt-silver-exterior", "Exterior", "Mt. Silver Exterior GSC.png"),
+        _floor("mt-silver-1f",       "1F",       "Mt. Silver 1F GSC.png"),
+        _floor("mt-silver-2f",       "2F",       "Mt. Silver 2F GSC.png"),
+        _floor("mt-silver-3f",       "3F",       "Mt. Silver 3F GSC.png"),
+        _floor("mt-silver-summit",   "Summit",   "Mt. Silver Summit GSC.png"),
+    ]),
+    # Kanto dungeons — Mt. Moon has B1F/B2F in GSC (no Square; that's HGSS-only)
+    _loc("mt-moon", "Mt. Moon", [
+        _floor("mt-moon-1f",    "1F",    "Mt Moon 1F GSC.png"),
+        _floor("mt-moon-b1f",   "B1F",   "Mt Moon B1F GSC.png"),
+        _floor("mt-moon-square","Square","Mt Moon Square GSC.png"),
+    ]),
+    _loc("rock-tunnel", "Rock Tunnel", [
+        _floor("rock-tunnel-1", "1F",  "Rock Tunnel 1 GSC.png"),
+        _floor("rock-tunnel-2", "B1F", "Rock Tunnel 2 GSC.png"),
+    ]),
+    _loc("victory-road-kanto", "Victory Road", [
+        _floor("victory-road-kanto-1f", "1F", "Victory Road 1F GSC.png"),
+        _floor("victory-road-kanto-2f", "2F", "Victory Road 2F GSC.png"),
+        _floor("victory-road-kanto-3f", "3F", "Victory Road 3F GSC.png"),
+    ]),
+    _loc("seafoam-islands", "Seafoam Islands", [
+        _floor("seafoam-islands-1f",  "1F",  "Seafoam Islands 1F GSC.png"),
+        _floor("seafoam-islands-b1f", "B1F", "Seafoam Islands B1F GSC.png"),
+        _floor("seafoam-islands-b2f", "B2F", "Seafoam Islands B2F GSC.png"),
+        _floor("seafoam-islands-b3f", "B3F", "Seafoam Islands B3F GSC.png"),
+        _floor("seafoam-islands-b4f", "B4F", "Seafoam Islands B4F GSC.png"),
+    ]),
+    _loc("cerulean-cave", "Cerulean Cave", [
+        _floor("cerulean-cave-1f",  "1F",  "Cerulean Cave 1F GSC.png"),
+        _floor("cerulean-cave-b1f", "B1F", "Cerulean Cave B1F GSC.png"),
+        _floor("cerulean-cave-2f",  "2F",  "Cerulean Cave 2F GSC.png"),
+    ]),
+]
+
 _HGSS_CAVE_MAPS: list[dict] = [
     _loc("sprout-tower", "Sprout Tower", [
         _floor("sprout-tower-1f", "1F", "Sprout Tower 1F HGSS.png"),
@@ -1360,9 +2092,6 @@ _EMERALD_CAVE_MAPS: list[dict] = [
     _loc("cave-of-origin", "Cave of Origin", [
         _floor("cave-of-origin-1f",  "1F",  "Cave of Origin 1F E.png"),
         _floor("cave-of-origin-b1f", "B1F", "Cave of Origin B1F E.png"),
-        _floor("cave-of-origin-b2f", "B2F", "Cave of Origin B2F E.png"),
-        _floor("cave-of-origin-b3f", "B3F", "Cave of Origin B3F E.png"),
-        _floor("cave-of-origin-b4f", "B4F", "Cave of Origin B4F E.png"),
     ]),
     _loc("shoal-cave", "Shoal Cave", [
         _floor("shoal-cave-lowtide-entrance",  "Low Tide Entrance",  "Shoal Cave Low Tide Entrance E.png"),
@@ -1432,22 +2161,392 @@ _PLATINUM_CAVE_MAPS: list[dict] = [
     ]),
 ]
 
+_UNOVA_CAVE_MAPS: list[dict] = [
+    _loc("wellspring-cave", "Wellspring Cave", [
+        _floor("wellspring-cave-b1f", "B1F", "Wellspring Cave B1F BW.png"),
+        _floor("wellspring-cave-b2f", "B2F", "Wellspring Cave B2F BW.png"),
+    ]),
+    _loc("relic-castle", "Relic Castle", [
+        _floor("relic-castle-1f",  "1F",  "Relic Castle 1F BW.png"),
+        _floor("relic-castle-b1f", "B1F", "Relic Castle B1F BW.png"),
+        _floor("relic-castle-b2f", "B2F", "Relic Castle B2F BW.png"),
+        _floor("relic-castle-b3f", "B3F", "Relic Castle B3F BW.png"),
+        _floor("relic-castle-b4f", "B4F", "Relic Castle B4F BW.png"),
+        _floor("relic-castle-b5f", "B5F", "Relic Castle B5F BW.png"),
+        _floor("relic-castle-b6f", "B6F", "Relic Castle B6F BW.png"),
+        _floor("relic-castle-b7f", "B7F", "Relic Castle B7F BW.png"),
+    ]),
+    _loc("castelia-sewers", "Castelia Sewers", [
+        _floor("castelia-sewers-b1f", "B1F", "Castelia Sewers BW.png"),
+    ]),
+    _loc("cold-storage", "Cold Storage", [
+        _floor("cold-storage-b1f", "B1F", "Cold Storage BW.png"),
+    ]),
+    _loc("chargestone-cave", "Chargestone Cave", [
+        _floor("chargestone-cave-b1f", "B1F", "Chargestone Cave B1F BW.png"),
+        _floor("chargestone-cave-b2f", "B2F", "Chargestone Cave B2F BW.png"),
+        _floor("chargestone-cave-b3f", "B3F", "Chargestone Cave B3F BW.png"),
+    ]),
+    _loc("celestial-tower", "Celestial Tower", [
+        _floor("celestial-tower-2f", "2F", "Celestial Tower 2F BW.png"),
+        _floor("celestial-tower-3f", "3F", "Celestial Tower 3F BW.png"),
+        _floor("celestial-tower-4f", "4F", "Celestial Tower 4F BW.png"),
+        _floor("celestial-tower-5f", "5F", "Celestial Tower 5F BW.png"),
+    ]),
+    _loc("twist-mountain", "Twist Mountain", [
+        _floor("twist-mountain-1f",  "1F",  "Twist Mountain 1F BW.png"),
+        _floor("twist-mountain-b1f", "B1F", "Twist Mountain B1F BW.png"),
+        _floor("twist-mountain-b2f", "B2F", "Twist Mountain B2F BW.png"),
+    ]),
+    _loc("dragonspiral-tower", "Dragonspiral Tower", [
+        _floor("dragonspiral-tower-exterior", "Exterior", "Dragonspiral Tower Exterior BW.png"),
+        _floor("dragonspiral-tower-1f",       "1F",       "Dragonspiral Tower 1F BW.png"),
+        _floor("dragonspiral-tower-2f",       "2F",       "Dragonspiral Tower 2F BW.png"),
+        _floor("dragonspiral-tower-3f",       "3F",       "Dragonspiral Tower 3F BW.png"),
+        _floor("dragonspiral-tower-4f",       "4F",       "Dragonspiral Tower 4F BW.png"),
+        _floor("dragonspiral-tower-5f",       "5F",       "Dragonspiral Tower 5F BW.png"),
+        _floor("dragonspiral-tower-6f",       "6F",       "Dragonspiral Tower 6F BW.png"),
+        _floor("dragonspiral-tower-7f",       "7F",       "Dragonspiral Tower 7F BW.png"),
+    ]),
+    _loc("victory-road", "Victory Road", [
+        _floor("victory-road-exterior", "Exterior", "Victory Road Exterior BW.png"),
+        _floor("victory-road-1f",       "1F",       "Victory Road 1F BW.png"),
+        _floor("victory-road-2f",       "2F",       "Victory Road 2F BW.png"),
+    ]),
+    # BW2-only locations
+    _loc("virbank-complex", "Virbank Complex", [
+        _floor("virbank-complex-outside", "Outside", "Virbank Complex Outside BW2.png"),
+        _floor("virbank-complex-inside",  "Inside",  "Virbank Complex Inside BW2.png"),
+    ]),
+    _loc("seaside-cave", "Seaside Cave", [
+        _floor("seaside-cave-1f",  "1F",  "Seaside Cave 1F BW2.png"),
+        _floor("seaside-cave-b1f", "B1F", "Seaside Cave B1F BW2.png"),
+    ]),
+    _loc("giant-chasm", "Giant Chasm", [
+        _floor("giant-chasm-exterior", "Exterior", "Giant Chasm BW2.png"),
+        _floor("giant-chasm-forest",   "Forest",   "Giant Chasm Forest BW2.png"),
+        _floor("giant-chasm-cave",     "Cave",     "Giant Chasm Cave BW2.png"),
+    ]),
+]
+
+_KALOS_CAVE_MAPS: list[dict] = [
+    _loc("connecting-cave", "Connecting Cave", [
+        _floor("connecting-cave-1f", "1F", "Connecting Cave XY.png"),
+    ]),
+    _loc("glittering-cave", "Glittering Cave", [
+        _floor("glittering-cave", "Interior", "Glittering Cave XY.png"),
+    ]),
+    _loc("frost-cavern", "Frost Cavern", [
+        _floor("frost-cavern-1f",  "1F",  "Frost Cavern 1F XY.png"),
+        _floor("frost-cavern-b1f", "B1F", "Frost Cavern B1F XY.png"),
+        _floor("frost-cavern-b2f", "B2F", "Frost Cavern B2F XY.png"),
+    ]),
+    _loc("terminus-cave", "Terminus Cave", [
+        _floor("terminus-cave-b1f", "B1F", "Terminus Cave B1F XY.png"),
+        _floor("terminus-cave-b2f", "B2F", "Terminus Cave B2F XY.png"),
+        _floor("terminus-cave-b3f", "B3F", "Terminus Cave B3F XY.png"),
+    ]),
+    _loc("victory-road", "Victory Road", [
+        _floor("victory-road-exterior", "Exterior", "Victory Road Exterior XY.png"),
+        _floor("victory-road-1f",       "1F",       "Victory Road 1F XY.png"),
+        _floor("victory-road-2f",       "2F",       "Victory Road 2F XY.png"),
+    ]),
+]
+
 CAVE_MAPS: dict[str, list[dict]] = {
     "heartgold": _HGSS_CAVE_MAPS,
+    "gold":      _GSC_CAVE_MAPS,
     "red":       _RED_CAVE_MAPS,
     "emerald":   _EMERALD_CAVE_MAPS,
     "platinum":  _PLATINUM_CAVE_MAPS,
+    "black":     _UNOVA_CAVE_MAPS,
+    "x":         _KALOS_CAVE_MAPS,
 }
 # Aliases
 for _a, _b in [
     ("soulsilver", "heartgold"),
-    ("gold", "heartgold"), ("silver", "heartgold"), ("crystal", "heartgold"),
+    ("silver", "gold"), ("crystal", "gold"),
     ("blue", "red"), ("yellow", "red"), ("firered", "red"), ("leafgreen", "red"),
     ("ruby", "emerald"), ("sapphire", "emerald"),
     ("omega-ruby", "emerald"), ("alpha-sapphire", "emerald"),
     ("diamond", "platinum"), ("pearl", "platinum"),
-    ("black", "platinum"), ("white", "platinum"),
-    ("black-2", "platinum"), ("white-2", "platinum"),
-    ("x", "platinum"), ("y", "platinum"),
+    ("white", "black"), ("black-2", "black"), ("white-2", "black"),
+    ("y", "x"),
 ]:
     CAVE_MAPS.setdefault(_a, CAVE_MAPS.get(_b, []))
+
+
+# ── Trainer route assignments ──────────────────────────────────────────────────
+# Maps trainer name → route_id(s) for rivals (list, one per battle group) and
+# E4/champion (str, the single route they occupy).
+#
+# Rival battle groups are detected automatically by cycling player_starter values
+# (see transform._group_rival_battles). Bulbapedia rival pages do NOT use
+# per-location section headings, so these mappings are hand-authored.
+#
+# Route IDs must match entries in ROUTE_ORDER. Set an entry to None to skip a
+# battle group (it won't appear on any floor). Games not listed here produce no
+# trainer encounters in the route data.
+
+_SS_HOENN_RIVAL = [
+    "route-103",        # 1 — Professor Birch's field (starter match)
+    "route-110",        # 2 — Cycling Road approach (after Slateport)
+    "mauville-city",    # 3 — before / after Wattson's gym
+    "mt-pyre",          # 4 — summit during Magma/Aqua raid
+    "lilycove-city",    # 5 — rival's house area after hideout raid
+    "ever-grande-city", # 6 — before Victory Road entrance
+]
+
+TRAINER_ROUTES: dict[str, dict[str, list[str | None] | str]] = {
+
+    # ── Gen 1: Red / Blue / Yellow / FireRed / LeafGreen ──────────────────────
+    # Gary's 6 rival battles before the champion phase.
+    # Champion phase is covered by the separate "Blue" champion entry.
+    # Bulbapedia page: "Blue (game)"; game codes RGB / Y / FRLG.
+    "red": {
+        "Gary": [
+            "pallet-town",    # 1 — Oak's lab (1 starter each)
+            "route-22",       # 2 — south of Viridian, before forest
+            "cerulean-city",  # 3 — Nugget Bridge area
+            "ss-anne",        # 4 — ship cabin
+            "lavender-town",  # 5 — Pokémon Tower
+            "saffron-city",   # 6 — Silph Co.
+        ],
+        "Blue":    "pokemon-league",
+        "Lorelei": "pokemon-league",
+        "Bruno":   "pokemon-league",
+        "Agatha":  "pokemon-league",
+        "Lance":   "pokemon-league",
+    },
+
+    # ── Gen 2: Gold / Silver / Crystal ────────────────────────────────────────
+    # Route IDs shared with HGSS (ROUTE_ORDER["gold"] = ROUTE_ORDER["heartgold"]).
+    # GSC Silver has 5 battle groups vs 8 in HGSS; groups beyond this list are
+    # silently dropped by transform.
+    "gold": {
+        "Silver": [
+            "cherrygrove-city",   # 1 — first encounter (stolen starter)
+            "azalea-town",        # 2 — after Team Rocket at Slowpoke Well
+            "burned-tower",       # 3 — beast release event
+            "goldenrod-city",     # 4 — Radio Tower rescue
+            "victory-road-kanto", # 5 — pre-E4 Kanto encounter
+        ],
+        "Will":  "pokemon-league",
+        "Koga":  "pokemon-league",
+        "Bruno": "pokemon-league",
+        "Karen": "pokemon-league",
+        "Lance": "pokemon-league",
+        "Red":   "mt-silver",     # postgame boss at Mt. Silver summit (lv60–65 team)
+    },
+
+    # ── Gen 2: HeartGold / SoulSilver ─────────────────────────────────────────
+    # Silver's 8 battle groups × 3 starter variants = 24 raw Bulbapedia entries.
+    # Groups 0–5: Johto + early Kanto; groups 6–7: late Kanto / post-game.
+    "heartgold": {
+        "Silver": [
+            "cherrygrove-city",   # 1 — first encounter (stolen starter, lv5)
+            "azalea-town",        # 2 — after Team Rocket at Slowpoke Well
+            "burned-tower",       # 3 — B1F, legendary beast release
+            "goldenrod-city",     # 4 — Radio Tower rescue
+            "mt-moon",            # 5 — Kanto (Monday night event)
+            "victory-road-kanto", # 6 — before the Kanto E4 gate
+            "pokemon-league",     # 7 — Indigo Plateau (pre-Lance area)
+            "mt-silver",          # 8 — final encounter (post-16 badges)
+        ],
+        "Will":  "pokemon-league",
+        "Koga":  "pokemon-league",
+        "Bruno": "pokemon-league",
+        "Karen": "pokemon-league",
+        "Lance": "pokemon-league",
+        "Red":   "mt-silver",     # postgame boss at Mt. Silver summit (lv80 team)
+    },
+
+    # ── Gen 3: Ruby / Sapphire ────────────────────────────────────────────────
+    # Both Brendan and May appear as the rival (one per playthrough); both are
+    # scraped from Bulbapedia and mapped to the same route sequence.
+    "ruby": {
+        "Brendan": _SS_HOENN_RIVAL,
+        "May":     _SS_HOENN_RIVAL,
+        "Wally":   ["victory-road"],  # single mandatory battle pre-E4
+        "Maxie":   "route-112",       # Team Magma boss (Mt. Chimney; route-112 is best available proxy)
+        "Archie":  "route-128",       # Team Aqua boss (Seafloor Cavern; route-128 is best available proxy)
+        "Sidney":  "pokemon-league",
+        "Phoebe":  "pokemon-league",
+        "Glacia":  "pokemon-league",
+        "Drake":   "pokemon-league",
+        "Steven":  "pokemon-league",
+    },
+
+    # Emerald keeps the same rival route sequence; Wallace replaces Steven.
+    "emerald": {
+        "Brendan": _SS_HOENN_RIVAL,
+        "May":     _SS_HOENN_RIVAL,
+        "Wally":   ["route-110", "victory-road"],  # Wattson area + pre-E4
+        "Maxie":   "route-112",                    # Team Magma boss (Mt. Chimney approach)
+        "Archie":  "route-128",                    # Team Aqua boss (near Seafloor Cavern)
+        "Sidney":  "pokemon-league",
+        "Phoebe":  "pokemon-league",
+        "Glacia":  "pokemon-league",
+        "Drake":   "pokemon-league",
+        "Wallace": "pokemon-league",
+    },
+
+    # ── Gen 4: Diamond / Pearl / Platinum ─────────────────────────────────────
+    # Barry has ~7 rival battles; the last one is just before Victory Road.
+    "diamond": {
+        "Barry": [
+            "twinleaf-town",  # 1 — first battle (1 starter each)
+            "sandgem-town",   # 2 — after getting Pokédex from Rowan
+            "jubilife-city",  # 3 — early Jubilife encounter
+            "hearthome-city", # 4 — Contest Hall area
+            "pastoria-city",  # 5 — after Crasher Wake's gym
+            "canalave-city",  # 6 — before Iron Island / Byron's gym
+            "victory-road",   # 7 — pre-E4
+        ],
+        "Cyrus":  "mt-coronet",     # Team Galactic boss at Spear Pillar
+        "Aaron":  "pokemon-league",
+        "Bertha": "pokemon-league",
+        "Flint":  "pokemon-league",
+        "Lucian": "pokemon-league",
+        "Cynthia":"pokemon-league",
+    },
+
+    # ── Gen 5: Black / White ──────────────────────────────────────────────────
+    # Cheren battles you after almost every gym; Bianca is more sporadic.
+    # N has 4 mandatory battles; scraper gives team (first) and rematch_team (last),
+    # so we place him at the League where his final Reshiram/Zekrom team appears.
+    "black": {
+        "Cheren": [
+            "nuvema-town",      # 1 — your room at the very start
+            "striaton-city",    # 2 — after first gym
+            "nacrene-city",     # 3 — after Lenora's gym
+            "nimbasa-city",     # 4 — Nimbasa area
+            "mistralton-city",  # 5 — after Skyla's gym
+            "opelucid-city",    # 6 — before 8th gym
+            "victory-road",     # 7 — pre-E4
+        ],
+        "Bianca": [
+            "striaton-city",    # 1 — near first gym
+            "nacrene-city",     # 2 — museum area
+            "castelia-city",    # 3 — Castelia sewers vicinity
+            "nimbasa-city",     # 4 — Ferris Wheel area
+            "route-5",          # 5 — Driftveil Drawbridge approach
+            "chargestone-cave", # 6 — cave entrance
+            "victory-road",     # 7 — pre-E4
+        ],
+        "N":        "pokemon-league",  # final battle (Reshiram/Zekrom)
+        "Ghetsis":  "pokemon-league",  # immediately after N
+        "Shauntal": "pokemon-league",
+        "Grimsley": "pokemon-league",
+        "Caitlin":  "pokemon-league",
+        "Marshal":  "pokemon-league",
+        "Alder":    "pokemon-league",
+    },
+
+    # Gen 5: Black 2 / White 2
+    # Hugh has 6 rival battles across the story; N and Ghetsis both appear at
+    # Giant Chasm near the endgame.
+    "black-2": {
+        "Hugh": [
+            "floccesy-ranch",  # 1 — ranch robbery confrontation
+            "virbank-city",    # 2 — outside Roxie's gym
+            "castelia-city",   # 3 — Castelia sewers
+            "nimbasa-city",    # 4 — stadiums area
+            "opelucid-city",   # 5 — after Drayden's gym
+            "victory-road",    # 6 — pre-E4
+        ],
+        "N":        "giant-chasm",     # postgame encounter at Giant Chasm
+        "Ghetsis":  "giant-chasm",     # final boss at Giant Chasm
+        "Iris":     "pokemon-league",
+        "Shauntal": "pokemon-league",
+        "Grimsley": "pokemon-league",
+        "Caitlin":  "pokemon-league",
+        "Marshal":  "pokemon-league",
+    },
+
+    # ── Gen 6: X / Y ──────────────────────────────────────────────────────────
+    # Calem and Serena are the two rival options; same battle sequence for both.
+    "x": {
+        "Calem": [
+            "aquacorde-town",   # 1 — Pokémon received from Sycamore's aide
+            "santalune-forest", # 2 — in the forest
+            "route-4",          # 3 — Lumiose approach
+            "shalour-city",     # 4 — Tower of Mastery
+            "coumarine-city",   # 5 — after Ramos's gym
+            "lumiose-city",     # 6 — second Lumiose visit
+            "laverre-city",     # 7 — after Valerie's gym area
+            "anistar-city",     # 8 — after Olympia's gym
+            "victory-road",     # 9 — pre-E4
+        ],
+        "Serena": [
+            "aquacorde-town",
+            "santalune-forest",
+            "route-4",
+            "shalour-city",
+            "coumarine-city",
+            "lumiose-city",
+            "laverre-city",
+            "anistar-city",
+            "victory-road",
+        ],
+        "Lysandre": [
+            "lumiose-city",     # 1 — Lysandre Café (mandatory story battle)
+            "geosenge-town",    # 2 — Team Flare Secret HQ entrance
+        ],
+        "Malva":    "pokemon-league",
+        "Siebold":  "pokemon-league",
+        "Wikstrom": "pokemon-league",
+        "Drasna":   "pokemon-league",
+        "Diantha":  "pokemon-league",
+    },
+
+    # ── Gen 7: Sun / Moon / Ultra Sun / Ultra Moon ────────────────────────────
+    # Hau battles you throughout the island challenge; Gladion has a shorter arc.
+    # Guzma and Lusamine are class "boss" and have 2 mandatory battles each.
+    # Note: Hala is listed as gym_leader in TRAINER_DEFS (Grand Trial kahuna)
+    # rather than elite_four, so he does not appear here.
+    "sun": {
+        "Hau": [
+            "iki-town",          # 1 — Iki Town festival ceremony
+            "hauoli-city",       # 2 — Hau'oli City outskirts
+            "paniola-ranch",     # 3 — Akala Island, Paniola Ranch
+            "royal-avenue",      # 4 — Royal Avenue (after Brooklet / Wela)
+            "malie-city",        # 5 — Ula'ula Island
+            "ancient-poni-path", # 6 — Poni Island
+            "mount-lanakila",    # 7 — final encounter before E4
+        ],
+        "Gladion": [
+            "aether-house",      # 1 — Route 15 / Aether House warning
+            "po-town",           # 2 — Team Skull's Po Town
+            "aether-paradise",   # 3 — rescue mission
+            "mount-lanakila",    # 4 — final encounter
+        ],
+        "Guzma":    "po-town",        # Team Skull boss (most important battle)
+        "Lusamine":  "aether-paradise", # Aether Foundation boss
+        "Molayne":  "pokemon-league",
+        "Olivia":   "pokemon-league",
+        "Acerola":  "pokemon-league",
+        "Kahili":   "pokemon-league",
+        "Kukui":    "pokemon-league",
+    },
+}
+
+# ── Aliases ────────────────────────────────────────────────────────────────────
+TRAINER_ROUTES["blue"]          = TRAINER_ROUTES["red"]
+TRAINER_ROUTES["yellow"]        = TRAINER_ROUTES["red"]
+TRAINER_ROUTES["firered"]       = TRAINER_ROUTES["red"]
+TRAINER_ROUTES["leafgreen"]     = TRAINER_ROUTES["red"]
+TRAINER_ROUTES["silver"]        = TRAINER_ROUTES["gold"]
+TRAINER_ROUTES["crystal"]       = TRAINER_ROUTES["gold"]
+TRAINER_ROUTES["soulsilver"]    = TRAINER_ROUTES["heartgold"]
+TRAINER_ROUTES["sapphire"]      = TRAINER_ROUTES["ruby"]
+TRAINER_ROUTES["omega-ruby"]    = TRAINER_ROUTES["ruby"]
+TRAINER_ROUTES["alpha-sapphire"]= TRAINER_ROUTES["ruby"]
+TRAINER_ROUTES["pearl"]         = TRAINER_ROUTES["diamond"]
+TRAINER_ROUTES["platinum"]      = TRAINER_ROUTES["diamond"]
+TRAINER_ROUTES["white"]         = TRAINER_ROUTES["black"]
+TRAINER_ROUTES["white-2"]       = TRAINER_ROUTES["black-2"]
+TRAINER_ROUTES["y"]             = TRAINER_ROUTES["x"]
+TRAINER_ROUTES["moon"]          = TRAINER_ROUTES["sun"]
+TRAINER_ROUTES["ultra-sun"]     = TRAINER_ROUTES["sun"]
+TRAINER_ROUTES["ultra-moon"]    = TRAINER_ROUTES["sun"]

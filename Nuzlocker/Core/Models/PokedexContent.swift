@@ -7,7 +7,7 @@ struct SpeciesContent: Codable {
 struct Creature: Codable, Identifiable {
     let id: Int
     let name: String
-    let types: [String]
+    let types: [PokemonType]
     let baseStats: BaseStats
     let abilities: [CreatureAbility]
     let evolvesTo: [EvolutionTarget]
@@ -34,18 +34,18 @@ struct EvolutionTarget: Codable {
 }
 
 struct EvolutionMethod: Codable {
-    let trigger: String        // "level-up", "use-item", "trade", etc.
+    let trigger: EvolutionTrigger
     let minLevel: Int?
-    let item: String?          // item slug (use-item trigger)
-    let heldItem: String?      // held item slug (trade-holding trigger)
-    let knownMove: String?     // move slug required to evolve
-    let timeOfDay: String?     // "day" | "night"
+    let item: String?
+    let heldItem: String?
+    let knownMove: String?
+    let timeOfDay: TimeOfDay?
     let minHappiness: Int?
 }
 
 struct LearnsetEntry: Codable {
     let move: String
-    let method: String         // "level-up" | "machine"
-    let level: Int?            // set for level-up; nil for machine moves
-    let machine: String?       // "hm01", "tm13", etc.; nil for level-up moves
+    let method: LearnsetMethod
+    let level: Int?
+    let machine: String?
 }
