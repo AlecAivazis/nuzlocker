@@ -355,7 +355,11 @@ _REGION_PREFIXES = ("johto-", "kanto-", "hoenn-", "sinnoh-", "unova-", "kalos-",
 def _strip_region(loc: str) -> str:
     for prefix in _REGION_PREFIXES:
         if loc.startswith(prefix):
-            return loc[len(prefix):]
+            loc = loc[len(prefix):]
+            break
+    # PokeAPI prefixes water routes with "sea-" (e.g. kanto-sea-route-19 → sea-route-19)
+    if loc.startswith("sea-route-"):
+        loc = loc[4:]
     return loc
 
 

@@ -118,20 +118,35 @@ TM_CODE: dict[str, str] = {
     "ultra-sun": "USUM", "ultra-moon": "USUM",
 }
 
-# Bulbapedia uses these codes inside {{Pokémon/3|game=...}} templates
-BULBA_CODE: dict[str, str] = {
-    "red": "RGB", "blue": "RGB", "yellow": "Y",
-    "gold": "GSC", "silver": "GSC", "crystal": "GSC",
-    "ruby": "RSE", "sapphire": "RSE", "emerald": "RSE",
-    "firered": "FRLG", "leafgreen": "FRLG",
-    "diamond": "DPPt", "pearl": "DPPt", "platinum": "DPPt",
-    "heartgold": "HGSS", "soulsilver": "HGSS",
-    "black": "BW", "white": "BW",
-    "black-2": "B2W2", "white-2": "B2W2",
-    "x": "XY", "y": "XY",
-    "omega-ruby": "ORAS", "alpha-sapphire": "ORAS",
-    "sun": "SM", "moon": "SM",
-    "ultra-sun": "USUM", "ultra-moon": "USUM",
+# Bulbapedia {{Party|game=...}} codes per version.
+# Each version accepts a list of codes — Bulbapedia is inconsistent:
+#   - Gym leaders use "RS"/"E" separately; rivals/bosses sometimes use "RSE", "Ru", "Sa", etc.
+#   - Gen 4: gym leaders use "DP"/"Pt"; rivals use combined codes on some pages.
+#   - Gen 5 BW: N uses "Bl"/"W" for version-exclusive battles plus shared "BW".
+#   - ORAS bosses use "OR"/"AS" instead of "ORAS".
+#   - USUM appearances use "US"/"UM" instead of "USUM".
+BULBA_CODE: dict[str, list[str]] = {
+    "red":    ["RGB"], "blue":    ["RGB"], "yellow":  ["Y"],
+    "gold":   ["GSC"], "silver":  ["GSC"], "crystal": ["GSC"],
+    "ruby":        ["RS",   "RSE", "Ru"],
+    "sapphire":    ["RS",   "RSE", "Sa"],
+    "emerald":     ["E",    "RSE"],
+    "firered":     ["FRLG"], "leafgreen": ["FRLG"],
+    "diamond":     ["DP",   "DPPt"],
+    "pearl":       ["DP",   "DPPt"],
+    "platinum":    ["Pt",   "DPPt"],
+    "heartgold":   ["HGSS"], "soulsilver": ["HGSS"],
+    "black":       ["BW",   "Bl"],
+    "white":       ["BW",   "W"],
+    "black-2":     ["B2W2", "B2"],
+    "white-2":     ["B2W2", "W2"],
+    "x":           ["XY"],  "y":          ["XY"],
+    "omega-ruby":      ["ORAS", "OR"],
+    "alpha-sapphire":  ["ORAS", "AS"],
+    "sun":         ["SM",   "Su"],           # some captains use "Su" not "SM"
+    "moon":        ["SM",   "M"],            # some captains use "M" not "SM"
+    "ultra-sun":   ["USUM", "US", "SUS"],   # "SUS" = compound Sun+UltraSun code
+    "ultra-moon":  ["USUM", "UM", "MUM"],   # "MUM" = compound Moon+UltraMoon code
 }
 
 # ── Type effectiveness (Gen 6+ chart) ─────────────────────────────────────────
@@ -414,23 +429,24 @@ async def scrape_species(
 
 # ── PokeAPI: encounter tables ──────────────────────────────────────────────────
 
-async def _fetch_area_encounters(
-    session: aiohttp.ClientSession,
-    sem: asyncio.Semaphore,
-    area_name: str,
-    version: str,
-) -> dict | None:
-    data = await _get_json(session, sem, f"{POKEAPI}/location-area/{area_name}")
-    if not data:
-        return None
+# For versions where PokeAPI has incomplete encounter data, fall back to an
+# earlier version from the same region. ORAS sea routes 105-109 and 122, 124-131
+# have no omega-ruby/alpha-sapphire entries in PokeAPI; the RSE tables are used
+# instead (encounter pools are essentially unchanged for those routes).
+_ENCOUNTER_FALLBACKS: dict[str, list[str]] = {
+    "omega-ruby":     ["emerald", "ruby",    "sapphire"],
+    "alpha-sapphire": ["emerald", "sapphire","ruby"],
+}
 
+
+def _extract_version_encounters(data: dict, ver_name: str) -> list[dict]:
     encounters: list[dict] = []
     for pe in data.get("pokemon_encounters", []):
         pokemon_url  = pe["pokemon"]["url"]
         pokemon_id   = int(pokemon_url.rstrip("/").split("/")[-1])
         pokemon_name = pe["pokemon"]["name"]
         for ver in pe["version_details"]:
-            if ver["version"]["name"] != version:
+            if ver["version"]["name"] != ver_name:
                 continue
             for enc in ver["encounter_details"]:
                 encounters.append({
@@ -442,6 +458,26 @@ async def _fetch_area_encounters(
                     "max_level":   enc["max_level"],
                     "chance":      enc["chance"],
                 })
+    return encounters
+
+
+async def _fetch_area_encounters(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    area_name: str,
+    version: str,
+    fallback_versions: list[str] | None = None,
+) -> dict | None:
+    data = await _get_json(session, sem, f"{POKEAPI}/location-area/{area_name}")
+    if not data:
+        return None
+
+    encounters = _extract_version_encounters(data, version)
+    if not encounters and fallback_versions:
+        for fb in fallback_versions:
+            encounters = _extract_version_encounters(data, fb)
+            if encounters:
+                break
 
     # Collapse duplicate slots: same (pokemon, method, conditions) → sum chance, widen level range
     merged: dict[tuple, dict] = {}
@@ -471,6 +507,7 @@ async def scrape_encounters(
     sem: asyncio.Semaphore,
     version: str,
 ) -> dict[str, dict]:
+    fallback_versions = _ENCOUNTER_FALLBACKS.get(version)
     print("  Fetching location-area list…")
     all_areas: list[dict] = []
     url: str | None = f"{POKEAPI}/location-area/?limit=1000"
@@ -483,7 +520,7 @@ async def scrape_encounters(
 
     print(f"  Checking {len(all_areas)} areas for version '{version}'…")
     results = await asyncio.gather(*[
-        _fetch_area_encounters(session, sem, a["name"], version)
+        _fetch_area_encounters(session, sem, a["name"], version, fallback_versions)
         for a in all_areas
     ])
     routes = {r["area"]: r for r in results if r}
@@ -723,7 +760,7 @@ def _build_pokemon_entry(params: dict[str, str]) -> dict | None:
     }
 
 
-def _extract_teams(wikitext: str, game_code: str) -> list[dict]:
+def _extract_teams(wikitext: str, game_codes: list[str]) -> list[dict]:
     """
     Walk wikitext and group {{Pokémon}} templates between {{Party}} / {{Party/end}} markers.
 
@@ -770,7 +807,8 @@ def _extract_teams(wikitext: str, game_code: str) -> list[dict]:
         elif tname == "party":
             # Party header — the game code is here, not in the Pokémon blocks
             m = re.search(r'\|\s*game\s*=\s*(\S+)', block)
-            in_matching_party = bool(m and m.group(1).upper() == game_code.upper())
+            _accepted = {c.upper() for c in game_codes}
+            in_matching_party = bool(m and m.group(1).upper() in _accepted)
             current = []
 
         elif tname.startswith("pok") and in_matching_party:
@@ -828,8 +866,8 @@ async def scrape_trainers(
         print(f"  [info] No trainer definitions for '{version}' — skipping.")
         return []
 
-    game_code = BULBA_CODE.get(version, "")
-    print(f"  Fetching {len(defs)} trainer pages (game_code={game_code})…")
+    game_codes = BULBA_CODE.get(version, [version])
+    print(f"  Fetching {len(defs)} trainer pages (game_codes={game_codes})…")
 
     async def process(tdef: dict) -> dict | None:
         page = tdef["page"]
@@ -838,9 +876,9 @@ async def scrape_trainers(
             print(f"    [warn] No wikitext for '{page}'")
             return None
 
-        teams = _extract_teams(wikitext, game_code)
+        teams = _extract_teams(wikitext, game_codes)
         if not teams:
-            print(f"    [warn] No {game_code} teams found on '{page}'")
+            print(f"    [warn] No {game_codes} teams found on '{page}'")
             return None
 
         result: dict = {k: v for k, v in tdef.items()
@@ -865,6 +903,13 @@ async def scrape_trainers(
 
     results = await asyncio.gather(*[process(t) for t in defs])
     return [r for r in results if r]
+
+
+# ── Version filtering ─────────────────────────────────────────────────────────
+
+def _for_version(entries: list[dict], version: str) -> list[dict]:
+    """Drop entries restricted to a different version via version_native."""
+    return [e for e in entries if not e.get("version_native") or e["version_native"] == version]
 
 
 # ── Assemble additional Pokémon IDs from static/gift/trade/trainer data ────────
@@ -1268,9 +1313,15 @@ async def run(version: str) -> None:
         else:
             trades = await scrape_ingame_trades(session, sem, version, CACHE_DIR)
 
+        # Filter version-exclusive statics/gifts down to this version's dataset.
+        # version_native is a scrape-time hint only — it must not appear in output.
+        static_encounters = _for_version(static.get("static_encounters", []), version)
+        gift_pokemon      = _for_version(static.get("gift_pokemon",      []), version)
+
         # 4. Species
         print("\n[4/7] Species")
-        pokemon_ids = collect_pokemon_ids(routes) | collect_extra_ids(static, trainers, trades)
+        filtered_static = {**static, "static_encounters": static_encounters, "gift_pokemon": gift_pokemon}
+        pokemon_ids = collect_pokemon_ids(routes) | collect_extra_ids(filtered_static, trainers, trades)
         species = await scrape_species(session, sem, pokemon_ids, version_group, hm_moves)
 
         # 5. TMs
@@ -1307,9 +1358,9 @@ async def run(version: str) -> None:
         "scraped_at":    datetime.now(timezone.utc).isoformat(),
         "hm_moves":      hm_moves,
         "badge_obedience": BADGE_OBEDIENCE.get(version, []),
-        "starters":      static.get("starters", []),
-        "static_encounters": static.get("static_encounters", []),
-        "gift_pokemon":  static.get("gift_pokemon", []),
+        "starters":          static.get("starters", []),
+        "static_encounters": static_encounters,
+        "gift_pokemon":      gift_pokemon,
         "in_game_trades": trades,
         "route_order":     ROUTE_ORDER.get(version, []),
         "routes":          routes,
